@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Safar Saathi">
+<meta name="theme-color" content="#F2F4F9">
+<title>Safar Saathi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root{--bg-body:#F2F4F9;--bg-card:#FFFFFF;--text-main:#1C2026;--text-muted:#5B6471;--text-light:#8A94A6;--border-light:#E2E8F0;--accent-green:#10B981;--accent-red:#EF4444;--accent-orange:#F59E0B;--accent-blue:#2563EB;
+--c-current-1:#17905F;--c-current-2:#0A4A33;--c-current-bg:#E8F5EE;--sab:env(safe-area-inset-bottom,20px);--sat:env(safe-area-inset-top,44px);--tab-height:calc(64px + var(--sab));}
+@media (prefers-color-scheme: dark){:root{--bg-body:#0E1118;--bg-card:#181D27;--text-main:#F1F5F9;--text-muted:#94A3B8;--border-light:#334155;--accent-blue:#60A5FA;}}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Bricolage Grotesque',-apple-system,sans-serif;background:var(--bg-body);color:var(--text-main);overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+button,input,select{font-family:inherit;border:none;outline:none;}
+button{cursor:pointer;}
+#app-container{max-width:560px;margin:0 auto;min-height:100vh;position:relative;background:var(--bg-body);}
+.text-xl{font-size:1.25rem;font-weight:700;}.text-lg{font-size:1.125rem;font-weight:600;}.text-2xl{font-size:1.5rem;font-weight:700;}.text-sm{font-size:.875rem;}.text-xs{font-size:.75rem;}
+.font-bold{font-weight:700;}.text-muted{color:var(--text-muted);}.text-center{text-align:center;}
+.flex{display:flex;}.flex-col{display:flex;flex-direction:column;}.flex-1{flex:1;min-width:0;}.items-center{align-items:center;}.items-start{align-items:flex-start;}.justify-between{justify-content:space-between;}
+.gap-2{gap:.5rem;}.gap-3{gap:.75rem;}.gap-4{gap:1rem;}.p-4{padding:1rem;}.mb-2{margin-bottom:.5rem;}.mb-4{margin-bottom:1rem;}.mb-6{margin-bottom:1.5rem;}.mb-8{margin-bottom:2rem;}.mt-4{margin-top:1rem;}
+.rounded-2xl{border-radius:1.5rem;}.rounded-xl{border-radius:1rem;}.z-10{z-index:10;}.hidden{display:none!important;}
+.header{padding:calc(1rem + var(--sat)) 1rem 1rem;position:sticky;top:0;z-index:40;background:var(--bg-body);display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.tab-content{display:none;padding-bottom:calc(var(--tab-height) + 2rem);}
+.tab-content.active{display:block;animation:fadeIn .3s ease;}
+.tab-bar{position:fixed;bottom:0;left:0;right:0;max-width:560px;margin:0 auto;height:var(--tab-height);background:var(--bg-card);border-top:1px solid var(--border-light);display:flex;padding-bottom:var(--sab);z-index:50;}
+.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:none;color:var(--text-muted);font-size:.66rem;font-weight:600;gap:3px;transition:.2s;}
+.tab-btn .emoji{font-size:1.15rem;filter:grayscale(1);opacity:.7;transition:.2s;}
+.tab-btn.active{color:var(--c-current-1);}.tab-btn.active .emoji{filter:none;opacity:1;transform:scale(1.12);}
+.hero-card{background:linear-gradient(135deg,var(--c-current-1),var(--c-current-2));color:#fff;padding:1.5rem;position:relative;overflow:hidden;display:flex;flex-direction:column;min-height:200px;justify-content:space-between;}
+.hero-bg-svg{position:absolute;bottom:-5px;right:-5px;width:150%;height:120px;opacity:.2;pointer-events:none;}
+.status-chip{background:rgba(255,255,255,.2);padding:6px 12px;border-radius:20px;font-size:.8rem;font-weight:600;display:inline-flex;gap:8px;align-items:center;}
+.pulse-dot{width:8px;height:8px;background:#fff;border-radius:50%;animation:pulse 1.5s infinite;}
+.route-bar{display:flex;align-items:center;gap:4px;margin-top:1rem;overflow-x:auto;padding-bottom:4px;}
+.route-node{font-size:.75rem;font-weight:700;padding:4px 8px;border-radius:8px;background:rgba(255,255,255,.12);white-space:nowrap;opacity:.7;}
+.route-node.active{background:#fff;color:var(--c-current-2);opacity:1;}
+.boarding-pass{background:var(--bg-card);border-radius:1.5rem;filter:drop-shadow(0 10px 15px rgba(0,0,0,.08));margin-top:-2rem;position:relative;z-index:5;}
+.bp-top{padding:1.5rem;display:flex;flex-direction:column;gap:12px;}
+.bp-bottom{padding:1.2rem 1.5rem;background:rgba(0,0,0,.02);border-radius:0 0 1.5rem 1.5rem;}
+.bp-divider{height:20px;position:relative;background-image:linear-gradient(to right,var(--border-light) 50%,transparent 50%);background-size:16px 1px;background-repeat:repeat-x;background-position:center;}
+.bp-divider::before,.bp-divider::after{content:'';position:absolute;top:0;width:20px;height:20px;background:var(--bg-body);border-radius:50%;}
+.bp-divider::before{left:-10px;}.bp-divider::after{right:-10px;}
+.emoji-tile{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;background:var(--c-current-bg);}
+.doc-chip{padding:6px 10px;border-radius:20px;font-size:.72rem;font-weight:600;display:inline-flex;align-items:center;gap:4px;border:1px solid var(--border-light);}
+.doc-chip.ok{border-color:var(--accent-green);color:var(--accent-green);background:rgba(16,185,129,.1);}
+.doc-chip.miss{border-color:var(--accent-red);color:var(--accent-red);background:rgba(239,68,68,.08);}
+.banner-warning{background:var(--accent-orange);color:#fff;padding:12px 16px;border-radius:12px;font-weight:600;display:flex;justify-content:space-between;align-items:center;cursor:pointer;margin-bottom:1.5rem;}
+.btn-primary{background:var(--c-current-1);color:#fff;padding:14px 22px;border-radius:12px;font-size:1rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;box-shadow:0 4px 10px rgba(0,0,0,.12);transition:.1s;}
+.btn-primary:active{transform:scale(.97);}.btn-primary:disabled{opacity:.45;pointer-events:none;}
+.btn-primary.big{padding:16px;}
+.btn-secondary{background:var(--bg-body);color:var(--text-main);border:1px solid var(--border-light);padding:12px 18px;border-radius:12px;font-size:.9rem;font-weight:600;width:100%;text-align:center;}
+.btn-outline{border:2px dashed var(--border-light);color:var(--text-muted);background:transparent;padding:13px;border-radius:12px;font-weight:600;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg-card);font-size:1.1rem;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+.btn-round{width:32px;height:32px;border-radius:50%;border:1px solid var(--border-light);background:var(--bg-body);color:var(--text-main);font-weight:700;flex-shrink:0;}
+.pill{border:1px solid var(--border-light);background:var(--bg-body);border-radius:20px;padding:6px 10px;font-size:12px;font-weight:700;color:var(--text-main);white-space:nowrap;}
+.pill.ok{color:var(--accent-green);border-color:var(--accent-green);}
+.pill.bad{color:var(--accent-red);border-color:var(--accent-red);}
+.who{color:var(--accent-blue);font-weight:700;}
+.text-ok{color:var(--accent-green);}.text-bad{color:var(--accent-red);}
+.sec-title{font-weight:800;font-size:13px;color:var(--text-muted);text-transform:uppercase;margin:18px 4px 8px;letter-spacing:.03em;}
+.card{background:var(--bg-card);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.det{border-bottom:1px solid var(--border-light);}
+.det summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:10px 0;font-weight:700;font-size:14px;gap:8px;}
+.det summary::-webkit-details-marker{display:none;}
+.ck{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border-light);}
+.ck:last-child{border-bottom:none;}
+.checkbox-round{width:24px;height:24px;border-radius:50%;border:2px solid var(--border-light);display:flex;align-items:center;justify-content:center;color:transparent;flex-shrink:0;}
+.check-item.done .checkbox-round{background:var(--accent-green);border-color:var(--accent-green);color:#fff;}
+.check-item.done .check-text{text-decoration:line-through;color:var(--text-muted);}
+.check-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-light);}
+.check-item:last-child{border-bottom:none;}
+.tl-item{display:flex;gap:12px;align-items:center;background:var(--bg-card);border-radius:14px;padding:12px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.tl-item.done{opacity:.65;}
+.tl-em{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+.stamps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+.stamp-wrapper{position:relative;aspect-ratio:1;display:flex;align-items:center;justify-content:center;border:2px dashed var(--border-light);border-radius:50%;}
+.stamp-svg{width:100%;height:100%;position:absolute;top:0;left:0;filter:grayscale(1);opacity:.3;transition:.3s;}
+.stamp-svg.collected{filter:none;opacity:1;}
+.stamp-emoji{font-size:1.5rem;position:relative;z-index:2;}
+.chipbar{display:flex;gap:6px;overflow-x:auto;margin-bottom:12px;padding-bottom:4px;}
+.chipbar button{white-space:nowrap;padding:6px 12px;border-radius:20px;border:1px solid var(--border-light);background:var(--bg-card);color:var(--text-main);font-size:12px;font-weight:700;}
+.chipbar button.on{background:var(--c-current-1);color:#fff;border-color:transparent;}
+.seg{display:flex;background:var(--bg-card);border-radius:12px;padding:4px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.seg button{flex:1;padding:9px 4px;border-radius:9px;background:none;color:var(--text-muted);font-weight:700;font-size:13px;}
+.seg button.on{background:var(--c-current-1);color:#fff;}
+.total-card{background:linear-gradient(135deg,#2563EB,#4338CA);color:#fff;padding:20px;border-radius:1.5rem;margin-bottom:14px;box-shadow:0 8px 20px rgba(37,99,235,.25);}
+.total-card .muted{color:rgba(255,255,255,.8);}
+.led-grp{font-size:12px;font-weight:700;color:var(--text-muted);margin:12px 0 4px;}
+.led-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--border-light);cursor:pointer;font-size:14px;}
+.led-row:last-child{border-bottom:none;}
+.day-card{background:var(--bg-card);border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.thumb-g{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.thumb-g img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;cursor:pointer;}
+.lbl2{display:block;font-size:12px;font-weight:700;color:var(--text-muted);margin:10px 0 2px;}
+.wwho{font-size:15px;margin:8px 0;}
+.wwho .who{font-size:22px;display:block;margin-top:2px;}
+.mini-in{width:120px;padding:7px;border-radius:8px;border:1px solid var(--border-light);background:var(--bg-body);color:var(--text-main);font-size:13px;}
+.bottom-sheet input,.bottom-sheet select,.card input,.card select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--border-light);background:var(--bg-body);color:var(--text-main);font-size:16px;margin:6px 0;}
+.inrow{display:flex;gap:8px;align-items:center;}
+.inrow>*{flex:1;min-width:0;margin:6px 0!important;}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);z-index:100;display:none;}
+.overlay.active{display:block;}
+.bottom-sheet{position:fixed;bottom:0;left:0;right:0;max-width:560px;margin:0 auto;background:var(--bg-card);border-radius:1.5rem 1.5rem 0 0;padding:1.4rem 1.4rem calc(1.4rem + var(--sab));z-index:101;transform:translateY(105%);transition:transform .3s cubic-bezier(.2,.8,.2,1);max-height:88vh;overflow-y:auto;box-shadow:0 -10px 25px rgba(0,0,0,.2);}
+.bottom-sheet.active{transform:translateY(0);}
+.sheet-handle{width:40px;height:5px;background:var(--border-light);border-radius:3px;margin:0 auto 1rem;}
+.bottom-sheet h3{font-size:1.2rem;font-weight:800;margin-bottom:10px;}
+#celebration-overlay{position:fixed;inset:0;background:rgba(14,17,24,.92);z-index:999;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;display:none;}
+#celebration-overlay.active{display:flex;}
+#confetti-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+.big-stamp{width:200px;height:200px;margin-bottom:2rem;animation:thump .5s cubic-bezier(.175,.885,.32,1.275) forwards;}
+.big-stamp svg{width:100%;height:100%;}
+.banner-stamp{position:fixed;top:calc(var(--sat) + 10px);left:50%;transform:translateX(-50%);background:#16A34A;color:#fff;padding:10px 18px;border-radius:20px;font-weight:700;z-index:200;box-shadow:0 6px 16px rgba(0,0,0,.2);animation:fadeIn .3s ease;max-width:90%;text-align:center;}
+#toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:10px 18px;border-radius:30px;z-index:9999;font-weight:700;font-size:14px;max-width:90%;text-align:center;opacity:0;transition:opacity .3s;pointer-events:none;}
+#toast.show{opacity:1;}
+.wiz-center{text-align:center;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+@keyframes pulse{0%{transform:scale(1);opacity:1;}50%{transform:scale(1.5);opacity:.5;}100%{transform:scale(1);opacity:1;}}
+@keyframes thump{to{transform:scale(1) rotate(-10deg);opacity:1;}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+</head>
+<body>
+<div id="app-container">
+  <header class="header">
+    <div>
+      <h1 class="text-xl" id="greeting">Safar Saathi</h1>
+      <p class="text-sm text-muted">14–29 Nov 2026 • 6 <span>Afraad</span></p>
+    </div>
+    <div class="flex gap-2">
+      <button class="btn-icon" data-act="lang" id="langBtn">EN</button>
+      <button class="btn-icon" data-act="weather" id="wbtn">--°</button>
+      <button class="btn-icon" data-act="settings">⚙️</button>
+    </div>
+  </header>
+
+  <!-- AB (NOW) -->
+  <main id="tab-ab" class="tab-content active p-4"><div id="ab-area"></div></main>
+
+  <!-- SAFAR (STAMPS + TIMELINE) -->
+  <main id="tab-safar" class="tab-content p-4">
+    <div class="card" style="padding:20px">
+      <div class="flex justify-between items-center mb-4"><h2 class="text-lg font-bold">Passport Book 📕</h2><div class="text-sm font-bold text-muted" id="stamp-count">0/0</div></div>
+      <div class="stamps-grid" id="stamps"></div>
+    </div>
+    <div class="btnrow-2 flex gap-2 mb-4"><button class="btn-secondary flex-1" data-act="actAdd">➕ Nayi jagah / kaam</button></div>
+    <h2 class="text-lg font-bold mb-4">Safar ki Tafseel</h2>
+    <div id="timeline"></div>
+  </main>
+
+  <!-- KAGHZAAT -->
+  <main id="tab-kaghzaat" class="tab-content p-4">
+    <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold">Safar ke Kaghzaat 🛂</h2></div>
+    <div class="flex gap-2 mb-4"><button class="btn-primary flex-1" data-act="wizOpen">Ek ek kar ke dein</button></div>
+    <div id="kaghzaat"></div>
+  </main>
+
+  <!-- LISTS -->
+  <main id="tab-lists" class="tab-content p-4">
+    <div class="seg">
+      <button class="on" data-act="listTab" data-v="packing" id="lt-packing">Packing</button>
+      <button data-act="listTab" data-v="shopping" id="lt-shopping">Shopping</button>
+      <button data-act="listTab" data-v="pending" id="lt-pending">Pending</button>
+    </div>
+    <div id="lists-area"></div>
+  </main>
+
+  <!-- KHARCHA -->
+  <main id="tab-kharcha" class="tab-content p-4">
+    <h2 class="text-xl font-bold mb-4">Kharcha Ledger 💰</h2>
+    <div id="kh-top"></div>
+    <button class="btn-primary mb-4" data-act="expNew">➕ Naya kharcha</button>
+    <div class="chipbar" id="kh-cats"></div>
+    <div class="card" id="kh-people"></div>
+    <div class="flex gap-2 mb-4">
+      <button class="btn-secondary flex-1" data-act="ledgerPdf">📄 Ledger PDF</button>
+      <button class="btn-secondary flex-1" data-act="agentEdit">🧾 Agent booking</button>
+    </div>
+    <div id="kh-ledger"></div>
+  </main>
+
+  <!-- PHOTOS -->
+  <main id="tab-photos" class="tab-content p-4">
+    <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold">Photos 📷</h2>
+      <button class="btn-secondary" style="width:auto;padding:8px 14px" data-act="zipOpen">📦 ZIP</button></div>
+    <div id="photos-area"></div>
+  </main>
+
+  <nav class="tab-bar">
+    <button class="tab-btn active" data-tab="ab"><span class="emoji">🧭</span><span>Ab</span></button>
+    <button class="tab-btn" data-tab="safar"><span class="emoji">🗺️</span><span>Safar</span></button>
+    <button class="tab-btn" data-tab="kaghzaat"><span class="emoji">🛂</span><span>Kaghzaat</span></button>
+    <button class="tab-btn" data-tab="lists"><span class="emoji">📋</span><span>Lists</span></button>
+    <button class="tab-btn" data-tab="kharcha"><span class="emoji">💰</span><span>Kharcha</span></button>
+    <button class="tab-btn" data-tab="photos"><span class="emoji">📷</span><span>Photos</span></button>
+  </nav>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<div class="bottom-sheet" id="sheet"><div class="sheet-handle"></div><div id="sheet-body"></div></div>
+<div id="celebration-overlay"><canvas id="confetti-canvas"></canvas><div class="big-stamp" id="celeb-stamp"></div><h2 class="text-2xl font-bold mb-2">Stamp mil gaya!</h2><p class="text-lg" id="celeb-name"></p></div>
+<div id="toast"></div>
+<input type="file" id="file-input" accept="image/*,application/pdf" hidden>
+
+<script>
+'use strict';
+/* ================= DATA ================= */
+const TRAV_DEFAULT=['Muhammad Farhan Khan','Musheer Muhammad Khan','Sughra Musheer','Sana Iqbal','Safaa Khan','Marwa Khan'];
+const CITIES={
+  KHI:{name:'Karachi',country:'Pakistan',zone:'Asia/Karachi',tz:'+05:00',lat:24.86,lng:67.00,c1:'#17905F',c2:'#0A4A33',bg:'#E8F5EE',svg:'M10 80 Q 50 20 90 80 M45 40 L55 40 M50 20 L50 80'},
+  SIN:{name:'Singapore',country:'Singapore',zone:'Asia/Singapore',tz:'+08:00',lat:1.35,lng:103.82,c1:'#EC4C42',c2:'#9E1F2A',bg:'#FDEDED',svg:'M20 90 L20 40 L35 40 L35 90 M45 90 L45 30 L60 30 L60 90 M70 90 L70 50 L85 50 L85 90'},
+  LGK:{name:'Langkawi',country:'Malaysia',zone:'Asia/Kuala_Lumpur',tz:'+08:00',lat:6.35,lng:99.80,c1:'#12A4AC',c2:'#0A5A70',bg:'#E7F6F7',svg:'M10 90 Q 30 50 50 90 T 90 90 M30 60 L70 30 L80 40'},
+  KUL:{name:'Kuala Lumpur',country:'Malaysia',zone:'Asia/Kuala_Lumpur',tz:'+08:00',lat:3.14,lng:101.69,c1:'#2A5FC4',c2:'#132C66',bg:'#EAEFF9',svg:'M35 90 L35 30 L40 20 L45 30 L45 90 M55 90 L55 30 L60 20 L65 30 L65 90 M40 50 L60 50'},
+  HKT:{name:'Phuket',country:'Thailand',zone:'Asia/Bangkok',tz:'+07:00',lat:7.88,lng:98.39,c1:'#F48E32',c2:'#BF431D',bg:'#FEF4EB',svg:'M20 70 Q 35 60 50 70 T 80 70 M30 65 L60 50 L60 65'},
+  BKK:{name:'Bangkok',country:'Thailand',zone:'Asia/Bangkok',tz:'+07:00',lat:13.75,lng:100.50,c1:'#8139AF',c2:'#43175C',bg:'#F2EBF7',svg:'M40 90 L40 50 L50 20 L60 50 L60 90 M30 90 L30 70 L40 70 M60 70 L70 70 L70 90'}
+};
+const TRIP_DAYS=(()=>{const a=[];for(let d=14;d<=29;d++)a.push('2026-11-'+String(d).padStart(2,'0'));return a;})();
+const CATS=['Khana','Shopping','Travel','Hotel','Tickets/Tours','Dawai','Others'];
+const CAT_BY_TYPE={flight:'Travel',transit:'Travel',transfer:'Travel',arrive:'Travel',hotel:'Hotel',shop:'Shopping',visit:'Tickets/Tours',form:'Others',task:'Others'};
+const TYPE_EMO={visit:'📸',shop:'🛍️',hotel:'🏨',transfer:'🚕',form:'📝',task:'✅',transit:'🔁',flight:'✈️',arrive:'🛬'};
+const RATES={PKR:1,USD:280,THB:8,MYR:60,SGD:205};
+const METHODS=['Card','Local Cash','Direct USD'];
+const PACK_DEF=['Power bank','Phone chargers','Makeup','Sunblock','Lotion','Vaseline','Cotton buds','Stepsil','Tooth brush/paste','Earpods','Medicine (bachon ki & risek)','Beach ka chapal','Beach ka matt','Carry bag for marwa/safaa','Hair clip n pony','Gadgets','Meta glasses','Laptop','Hair brush','Milk + jar + bottles','Pampers','Driving license','Doodh','Cake','Cheese','Gluco biscuit'];
+const SHOP_DEF=[
+  {cat:'Bachon ke kapray',items:['Safaa (dresses)','Marwa (outfits)','Harib (casual)','Moiz (t-shirts)','Mohib (jackets)','Faris (sets)']},
+  {cat:'Walidain & in-laws',items:['Saas/Susar: stoles','Abbu/Ammi: health gifts']},
+  {cat:'Rishtedaar',items:["Sala: branded shirt",'Ayesha: scarf','Farah/Adeel: silk+shirt','Saira/Rehan: silk+shirt','Hina/Moiz: outfit+shirt']},
+  {cat:'Bags & luggage',items:['Safaa smart bag','Adult ride-on luggage','Pre-loved bags (Moppet)']},
+  {cat:'Ghar ke liye',items:['Thai latex pillows','Smart WiFi switches','Tea','Dried mangoes','Thai decor']}
+];
+const DOCS=[
+  {id:'passport',cat:'Kaghzaat',icon:'🛂',title:'Passport',multi:1},
+  {id:'sgvisa',cat:'Kaghzaat',icon:'🛂',title:'Singapore visa',multi:1},
+  {id:'myvisa',cat:'Kaghzaat',icon:'🛂',title:'Malaysia visa',multi:1},
+  {id:'thvisa',cat:'Kaghzaat',icon:'🛂',title:'Thailand visa',multi:1},
+  {id:'polio',cat:'Kaghzaat',icon:'💉',title:'Polio cert',multi:1},
+  {id:'insurance',cat:'Kaghzaat',icon:'🛡️',title:'Travel insurance',multi:1},
+  {id:'sgac',cat:'Forms',icon:'📝',title:'SGAC (Singapore)',multi:1},
+  {id:'mdac',cat:'Forms',icon:'📝',title:'MDAC (Malaysia)',multi:1},
+  {id:'tdac',cat:'Forms',icon:'📝',title:'TDAC (Thailand)',multi:1},
+  {id:'h_sg',cat:'Hotels',icon:'🏨',title:'Village Hotel Bugis'},
+  {id:'h_lgk',cat:'Hotels',icon:'🏨',title:'Langkawi Beach Resort'},
+  {id:'h_kul',cat:'Hotels',icon:'🏨',title:'KL City Hotel'},
+  {id:'h_hkt',cat:'Hotels',icon:'🏨',title:'Phuket Beach Resort'},
+  {id:'h_bkk',cat:'Hotels',icon:'🏨',title:'Bangkok City Hotel'},
+  {id:'tix_sgtour',cat:'Tours',icon:'🎟️',title:'SG City Tour'},
+  {id:'tix_lgk',cat:'Tours',icon:'🎟️',title:'Langkawi SkyBridge'},
+  {id:'tix_mangrove',cat:'Tours',icon:'🎟️',title:'Mangrove Safari'},
+  {id:'tix_carnival',cat:'Tours',icon:'🎟️',title:'Carnival Magic'},
+  {id:'tix_hanuman',cat:'Tours',icon:'🎟️',title:'Hanuman World'},
+  {id:'tix_safari',cat:'Tours',icon:'🎟️',title:'Safari World'},
+  {id:'tix_cruise',cat:'Tours',icon:'🚢',title:'Chao Phraya Cruise'},
+  {id:'spa',cat:'Tours',icon:'💆',title:'Thai Spa'},
+  {id:'ph_agent',cat:'Phones',icon:'📞',title:'Travel agent',type:'tel'},
+  {id:'ph_t_sg',cat:'Phones',icon:'🚕',title:'Transport SG',type:'tel'},
+  {id:'ph_t_lgk',cat:'Phones',icon:'🚕',title:'Transport LGK',type:'tel'},
+  {id:'ph_t_kul',cat:'Phones',icon:'🚕',title:'Transport KUL',type:'tel'},
+  {id:'ph_t_hkt',cat:'Phones',icon:'🚕',title:'Transport HKT',type:'tel'},
+  {id:'ph_t_bkk',cat:'Phones',icon:'🚕',title:'Transport BKK',type:'tel'}
+];
+const DOC_BY={};DOCS.forEach(d=>DOC_BY[d.id]=d);
+/* Tickets: ek ticket mein kai legs ho sakti hain; har leg ka alag boarding pass */
+const TICKETS=[
+  {id:'T1',name:'Thai Airways · Ticket 1 (PNR QHZSKG)',sub:'KHI → BKK → SIN, aur wapsi BKK → KHI (29 Nov)',legs:[['L_TG342','KHI → BKK · TG 342 (14 Nov)'],['L_TG403','BKK → SIN · TG 403 (15 Nov)'],['L_TG341','BKK → KHI · TG 341 (29 Nov)']]},
+  {id:'T2',name:'Singapore → Langkawi',sub:'Alag ticket · 17 Nov',legs:[['L_SIN_LGK','SIN → LGK (17 Nov)']]},
+  {id:'T3',name:'Langkawi → Kuala Lumpur',sub:'Alag ticket · 20 Nov',legs:[['L_LGK_KUL','LGK → KUL (20 Nov)']]},
+  {id:'T4',name:'Kuala Lumpur → Phuket',sub:'Alag ticket · 22 Nov',legs:[['L_KUL_HKT','KUL → HKT (22 Nov)']]},
+  {id:'T5',name:'Phuket → Bangkok',sub:'Alag ticket · 26 Nov',legs:[['L_HKT_BKK','HKT → BKK (26 Nov)']]}
+];
+const LEG_LABEL={};TICKETS.forEach(tk=>tk.legs.forEach(([id,l])=>LEG_LABEL[id]=l));
+
+/* Itinerary (spreadsheet ke hisaab se). c = city code, place = folder ka naam, docs = zaroori documents, bp = boarding pass leg */
+const T=(id,dt,c,type,emoji,title,place,docs=[],bp=null)=>({id,dt,c,type,emoji,title,place,docs,bp});
+const ITIN=[
+  T('s01','2026-11-13T12:00','KHI','form','📝','SGAC submit karein (SG Arrival Card)','Online form',['sgac']),
+  T('s02','2026-11-14T23:35','KHI','flight','✈️','Flight TG 342: KHI → BKK','Jinnah Terminal',[],'L_TG342'),
+  T('s03','2026-11-15T06:10','BKK','transit','🔁','BKK transit','Suvarnabhumi Airport'),
+  T('s04','2026-11-15T07:40','BKK','flight','✈️','Flight TG 403: BKK → SIN','BKK to SIN',[],'L_TG403'),
+  T('s05','2026-11-15T09:00','SIN','form','📝','MDAC submit karein (Malaysia)','Online form',['mdac']),
+  T('s06','2026-11-15T11:15','SIN','arrive','🛬','Changi T2 land (priority immigration)','Changi Airport T2',['sgvisa','passport']),
+  T('s07','2026-11-15T12:00','SIN','visit','🌿','Jewel Changi tour','Jewel Changi'),
+  T('s08','2026-11-15T14:00','SIN','hotel','🏨','Hotel check-in','Village Hotel Bugis',['h_sg','ph_t_sg']),
+  T('s09','2026-11-16T09:00','SIN','visit','🦁','Singapore city tour','Singapore City Tour',['tix_sgtour']),
+  T('s10','2026-11-17T12:00','SIN','transfer','🚕','Hotel check-out, airport transfer','Bugis Transfer',['h_sg']),
+  T('s11','2026-11-17T15:05','SIN','flight','🦋','Flight: SIN → LGK','Changi T3',[],'L_SIN_LGK'),
+  T('s12','2026-11-17T17:00','LGK','hotel','🏝️','Langkawi hotel check-in','Langkawi Beach Resort',['myvisa','h_lgk','ph_t_lgk']),
+  T('s13','2026-11-18T10:00','LGK','visit','🚡','Langkawi SkyBridge & cable car','Langkawi SkyBridge',['tix_lgk']),
+  T('x01','2026-11-18T12:30','LGK','visit','🚠','Langkawi SkyCab','Langkawi SkyCab'),
+  T('x02','2026-11-18T16:00','LGK','visit','🦅','Eagle Square','Eagle Square'),
+  T('s14','2026-11-19T10:00','LGK','visit','🛶','Mangrove safari','Kilim Geoforest',['tix_mangrove']),
+  T('s15','2026-11-20T10:00','LGK','form','📝','TDAC submit karein (Thailand)','Online form',['tdac']),
+  T('s16','2026-11-20T11:00','LGK','transfer','🚕','Hotel check-out, airport','Langkawi Beach Resort',['h_lgk']),
+  T('s17','2026-11-20T13:00','LGK','flight','✈️','Flight: LGK → KUL','Langkawi Airport',[],'L_LGK_KUL'),
+  T('s18','2026-11-20T15:00','KUL','hotel','🏨','KL hotel check-in','Kuala Lumpur City Hotel',['h_kul','ph_t_kul']),
+  T('s19','2026-11-21T11:00','KUL','visit','🏙️','KL sightseeing & shopping','Petronas Towers'),
+  T('s20','2026-11-22T14:30','KUL','transfer','🚕','Hotel check-out, KLIA transfer','Kuala Lumpur City Hotel',['h_kul']),
+  T('s21','2026-11-22T17:50','KUL','flight','✈️','Flight: KUL → HKT','KLIA',[],'L_KUL_HKT'),
+  T('s22','2026-11-22T20:00','HKT','hotel','🏨','Phuket hotel check-in','Phuket Beach Resort',['thvisa','h_hkt','ph_t_hkt']),
+  T('s23','2026-11-23T20:00','HKT','visit','🎪','Carnival Magic show & dinner','Carnival Magic',['tix_carnival']),
+  T('s24','2026-11-24T14:00','HKT','visit','🐒','Hanuman World zipline & skywalk','Hanuman World',['tix_hanuman']),
+  T('s25','2026-11-25T11:00','HKT','visit','🏖️','Beach & coastal walk','Patong Beach'),
+  T('s26','2026-11-25T14:30','HKT','visit','💆','Thai spa (Ammi, Saas & Begum)','Oasis Spa',['spa']),
+  T('s27','2026-11-26T12:30','HKT','transfer','🚕','Hotel check-out, airport','Phuket Beach Resort',['h_hkt']),
+  T('s28','2026-11-26T15:25','HKT','flight','✈️','Flight: HKT → BKK','Phuket Airport',[],'L_HKT_BKK'),
+  T('s29','2026-11-26T18:00','BKK','hotel','🏨','Bangkok hotel check-in','Bangkok City Hotel',['h_bkk','ph_t_bkk']),
+  T('s30','2026-11-27T08:30','BKK','visit','🦒','Safari World full-day tour','Safari World',['tix_safari']),
+  T('s31','2026-11-27T18:30','BKK','shop','🛍️','Pratunam wholesale shopping','Pratunam Market'),
+  T('s32','2026-11-28T10:30','BKK','shop','👜','CentralWorld & ICONSIAM (Moppet)','CentralWorld & ICONSIAM'),
+  T('s33','2026-11-28T18:30','BKK','visit','🚢','Chao Phraya sunset dinner cruise','Chao Phraya Cruise',['tix_cruise']),
+  T('s34','2026-11-29T12:00','BKK','transfer','🧳','Hotel check-out, airport lounge','Bangkok City Hotel',['h_bkk']),
+  T('s35','2026-11-29T18:50','BKK','flight','🏠','Wapsi flight TG 341: BKK → KHI','Suvarnabhumi Airport',[],'L_TG341'),
+  T('s36','2026-11-29T22:25','KHI','arrive','🏁','Karachi pohunch (trip khatam)','Jinnah Terminal')
+];
+/* 'passport' ko DOCS mein multi ke taur par add karne ke liye alias */
+DOC_BY.passport=DOC_BY.passport;
+
+/* ================= HELPERS ================= */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uuid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const safe=s=>String(s).replace(/[\\/:*?"<>|]+/g,'-').trim().slice(0,60)||'x';
+const pad=n=>String(n).padStart(2,'0');
+function t(ur,en){return S.lang==='en'?en:ur;}
+function showToast(m){const el=$('toast');el.textContent=m;el.classList.add('show');clearTimeout(showToast._t);showToast._t=setTimeout(()=>el.classList.remove('show'),2300);}
+function localDate(ms){const d=new Date(ms);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function dayNumber(d){return Math.round((Date.parse(d+'T00:00:00Z')-Date.parse('2026-11-14T00:00:00Z'))/864e5)+1;}
+function dayLabel(d){return new Date(d+'T12:00:00Z').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',timeZone:'UTC'});}
+function defaultDate(){const ld=localDate(now());return TRIP_DAYS.includes(ld)?ld:'2026-11-14';}
+function dur(ms){if(ms<=0)return '0m';const m=Math.floor(ms/60000),d=Math.floor(m/1440),h=Math.floor(m%1440/60),mm=m%60;return (d?d+'d ':'')+(h||d?h+'h ':'')+mm+'m';}
+function fmtT(s){const C=CITIES[s.c];return new Date(s.ts).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',timeZone:C.zone});}
+function locOf(s){return {country:CITIES[s.c].country,city:CITIES[s.c].name,place:s.place};}
+function locKey(l){return l.country+'|'+l.city+'|'+l.place;}
+function pathOf(l){
+  if(!l)return ['Misc'];
+  if(l.country==='Pakistan')return [l.city,l.place];
+  if(l.country===l.city)return [l.country,l.place];
+  return [l.country,l.city,l.place];
+}
+function now(){const v=S.settings.simNow;if(v){const x=Date.parse(v);if(!isNaN(x))return x;}return Date.now();}
+
+/* ================= STATE ================= */
+const DEF={lang:'ur',travelers:null,comp:{},skip:{},docs:{},pack:{},shop:{},packX:[],shopX:[],custom:[],expenses:[],extra:[],closed:{},agentPKR:0,wizDone:false,installDismissed:false,settings:{photoQ:'compressed',simNow:''}};
+function loadState(){
+  let d={};try{d=JSON.parse(localStorage.getItem('safarState'))||{};}catch(e){d={};}
+  const s=Object.assign({},JSON.parse(JSON.stringify(DEF)),d);
+  s.settings=Object.assign({},DEF.settings,d.settings||{});
+  return s;
+}
+let S=loadState();
+function save(){try{localStorage.setItem('safarState',JSON.stringify(S));}catch(e){showToast('Save nahi hua. Storage bhar gaya hai.');}}
+function TR(){return S.travelers&&S.travelers.length?S.travelers:TRAV_DEFAULT;}
+
+/* ================= STEPS & DOCS ================= */
+function allSteps(){
+  return ITIN.concat(S.custom).map(x=>Object.assign({},x,{ts:Date.parse(x.dt+':00'+CITIES[x.c].tz)})).sort((a,b)=>a.ts-b.ts);
+}
+function findStep(id){return allSteps().find(s=>s.id===id);}
+function curIndex(steps){let i=steps.findIndex(s=>!S.comp[s.id]&&!S.skip[s.id]);return i<0?steps.length-1:i;}
+function docKeys(id){const d=DOC_BY[id];return d&&d.multi?TR().map((_,i)=>id+'_'+i):[id];}
+function docDone(k){const x=S.docs[k];return !!x&&(x.status==='done'||x.status==='not_needed');}
+function stepMissing(s){
+  const docs=[],bp=[];
+  if(s.bp)TR().forEach((nm,i)=>{const k='bp_'+s.bp+'_'+i;if(!docDone(k))bp.push({k,who:nm,leg:s.bp});});
+  if(s.type!=='flight')s.docs.forEach(id=>{const d=DOC_BY[id];docKeys(id).forEach((k,ix)=>{if(!docDone(k))docs.push({k,id,title:d.title,who:d.multi?TR()[ix]:'',tel:d.type==='tel'});});});
+  return {docs,bp};
+}
+function pendingItems(){
+  const out=[];
+  DOCS.forEach(d=>docKeys(d.id).forEach((k,i)=>{if(!docDone(k))out.push({k,title:d.title,who:d.multi?TR()[i]:'',multi:!!d.multi,tel:d.type==='tel'});}));
+  TICKETS.forEach(tk=>tk.legs.forEach(([lid,label])=>TR().forEach((nm,i)=>{const k='bp_'+lid+'_'+i;if(!docDone(k))out.push({k,title:'Boarding pass · '+label,who:nm,multi:false,bp:true});})));
+  return out;
+}
+function knownPlaces(){
+  const m=new Map();
+  const add=l=>{const k=locKey(l);if(!m.has(k))m.set(k,{key:k,loc:l,label:pathOf(l).join(' › ')});};
+  allSteps().forEach(s=>add(locOf(s)));
+  S.extra.forEach(x=>add(x.loc));
+  return [...m.values()].sort((a,b)=>a.label.localeCompare(b.label));
+}
+
+/* ================= INDEXEDDB ================= */
+let db=null;
+function openDB(){
+  return new Promise((res,rej)=>{
+    const r=indexedDB.open('SafarSaathiDB',2);
+    r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains('files'))d.createObjectStore('files',{keyPath:'id'});};
+    r.onsuccess=()=>{db=r.result;res();};
+    r.onerror=()=>rej(r.error);
+  });
+}
+function idbPut(rec){return new Promise((res,rej)=>{const tx=db.transaction('files','readwrite');tx.objectStore('files').put(rec);tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error);});}
+function idbGet(id){return new Promise((res,rej)=>{const q=db.transaction('files','readonly').objectStore('files').get(id);q.onsuccess=()=>res(q.result||null);q.onerror=()=>rej(q.error);});}
+function idbAll(){return new Promise((res,rej)=>{const q=db.transaction('files','readonly').objectStore('files').getAll();q.onsuccess=()=>res(q.result||[]);q.onerror=()=>rej(q.error);});}
+function idbDel(id){return new Promise((res,rej)=>{const tx=db.transaction('files','readwrite');tx.objectStore('files').delete(id);tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error);});}
+
+/* Object URLs ko track karke revoke karte hain taake memory leak na ho */
+let gridUrls=[],sheetUrls=[];
+function freeGrid(){gridUrls.forEach(u=>URL.revokeObjectURL(u));gridUrls=[];}
+function freeSheet(){sheetUrls.forEach(u=>URL.revokeObjectURL(u));sheetUrls=[];}
+function urlFor(blob,arr){const u=URL.createObjectURL(blob);arr.push(u);return u;}
+
+/* ================= IMAGE COMPRESSION ================= */
+function compImg(f){
+  if(!f.type||!f.type.startsWith('image')||S.settings.photoQ!=='compressed')return Promise.resolve(f);
+  return new Promise(res=>{
+    const u=URL.createObjectURL(f);const i=new Image();
+    i.onload=()=>{
+      let w=i.width,h=i.height;const m=2560;
+      if(w>m||h>m){if(w>h){h=h*(m/w);w=m;}else{w=w*(m/h);h=m;}}
+      const c=document.createElement('canvas');c.width=Math.round(w);c.height=Math.round(h);
+      c.getContext('2d').drawImage(i,0,0,c.width,c.height);
+      c.toBlob(b=>{URL.revokeObjectURL(u);c.width=0;res(b||f);},'image/jpeg',0.88);
+    };
+    i.onerror=()=>{URL.revokeObjectURL(u);res(f);};
+    i.src=u;
+  });
+}
+
+/* ================= FILE PICKER ================= */
+let pickCb=null;
+function pickFiles(cb,multi){
+  pickCb=cb;
+  const fi=$('file-input');
+  fi.multiple=!!multi;
+  fi.value='';
+  fi.click();
+}
+$('file-input').addEventListener('change',async e=>{
+  const files=[...e.target.files];const cb=pickCb;pickCb=null;
+  if(files.length&&cb){try{await cb(files);}catch(err){showToast('Save nahi hua. Dobara koshish karein.');}}
+});
+async function savePhoto(file,loc,date){
+  const blob=await compImg(file);
+  await idbPut({id:'ph_'+uuid(),kind:'photo',date,loc,ts:Date.now(),mime:blob.type||file.type,blob});
+  S.photoPlaces=S.photoPlaces||{};S.photoPlaces[locKey(loc)]=1;
+}
+async function setDocFile(k,files,title){
+  const f=files[0];const blob=await compImg(f);
+  await idbPut({id:'doc:'+k,kind:'doc',mime:blob.type||f.type,name:f.name,blob});
+  S.docs[k]={status:'done',mime:blob.type||f.type,name:f.name};
+  save();
+}
+
+/* ================= SHEETS ================= */
+function openSheet(html){
+  freeSheet();
+  $('sheet-body').innerHTML=html;
+  $('sheet').classList.add('active');$('overlay').classList.add('active');
+  $('sheet').scrollTop=0;
+  hydrateSheet();
+}
+function closeSheet(){
+  $('sheet').classList.remove('active');$('overlay').classList.remove('active');
+  freeSheet();
+}
+$('overlay').addEventListener('click',closeSheet);
+function hydrateSheet(){
+  document.querySelectorAll('#sheet-body [data-blob]').forEach(async el=>{
+    const r=await idbGet(el.dataset.blob).catch(()=>null);
+    if(r&&r.blob)el.src=urlFor(r.blob,sheetUrls);
+  });
+}
+function askConfirm(title,text,act,arg){
+  openSheet(`<h3>${title}</h3><p class="text-sm text-muted mb-4">${text}</p>
+    <button class="btn-primary big mb-2" data-act="${act}" data-id="${esc(arg||'')}">${t('Haan, karein','Yes, do it')}</button>
+    <button class="btn-secondary" data-act="closeSheet">${t('Cancel','Cancel')}</button>`);
+}
+
+/* ================= COPY ================= */
+function copyText(txt){
+  const fallback=()=>{const ta=document.createElement('textarea');ta.value=txt;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(e){}ta.remove();showToast(t('Copy ho gaya!','Copied!'));};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(()=>showToast(t('Copy ho gaya!','Copied!')),fallback);}
+  else fallback();
+}
+
+/* ================= SHARE / DOWNLOAD ================= */
+let resFile=null;
+function showResult(file,msg){
+  resFile=file;
+  openSheet(`<h3>✅ ${t('Tayyar hai','Ready')}</h3><p class="text-sm text-muted mb-4">${esc(msg)} · ${(file.size/1048576).toFixed(2)} MB</p>
+    <button class="btn-primary big mb-2" data-act="shareRes">📤 Save / Share (Files app)</button>
+    <button class="btn-secondary" data-act="closeSheet">${t('Band karein','Close')}</button>`);
+}
+function shareOrDownload(file){
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    navigator.share({files:[file],title:file.name}).catch(()=>{});
+    return;
+  }
+  const u=URL.createObjectURL(file);
+  const a=document.createElement('a');a.href=u;a.download=file.name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(u),20000);
+}
+
+/* ================= RENDER: AB (NOW) ================= */
+function renderAb(){
+  const steps=allSteps(),Tm=now();
+  const ci=curIndex(steps),cur=steps[ci],C=CITIES[cur.c];
+  const root=document.documentElement.style;
+  root.setProperty('--c-current-1',C.c1);root.setProperty('--c-current-2',C.c2);root.setProperty('--c-current-bg',C.bg);
+  const nc=steps.find(s=>s.ts>Tm&&s.c!==cur.c);
+  const nt=steps.find(s=>s.ts>Tm&&!S.comp[s.id]);
+  const dn=dayNumber(localDate(Tm));
+  const dayTxt=dn<1?t('Safar se pehle','Pre-trip'):dn>16?t('Safar khatam','Trip ended'):t('Din','Day')+' '+dn+'/16';
+  const legs=[];steps.forEach(s=>{if(!legs.length||legs[legs.length-1]!==s.c)legs.push(s.c);});
+  let node=0;for(let j=1;j<=ci;j++)if(steps[j].c!==steps[j-1].c)node++;
+  const pend=pendingItems().length;
+
+  let h=`<div class="hero-card rounded-2xl mb-8">
+    <svg class="hero-bg-svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="${C.svg}" fill="none" stroke="white" stroke-width="2"/></svg>
+    <div class="flex justify-between items-start z-10">
+      <div><h2 class="text-2xl font-bold mb-1">${C.name}</h2>
+        <div class="status-chip"><div class="pulse-dot"></div><div class="flex-col">
+          <span class="text-xs">${t('Agla shehar','Next city')}${nc?' ('+esc(CITIES[nc.c].name)+')':''}: <b data-until="${nc?nc.ts:0}">—</b></span>
+          <span class="text-xs">${t('Agla kaam','Next task')}: <b data-until="${nt?nt.ts:0}">—</b></span>
+        </div></div></div>
+      <div class="text-sm font-bold" style="opacity:.85">${dayTxt}</div>
+    </div>
+    <div class="route-bar z-10">${legs.map((c,i)=>`<div class="route-node ${i===node?'active':''}">${c}</div>`).join('')}</div>
+  </div>`;
+
+  if(pend>0)h+=`<div class="banner-warning" data-act="tab" data-v="kaghzaat"><span>⚠️ ${pend} ${t('kaghzaat/bp baaki hain','documents/passes pending')}</span><span class="text-sm">${t('Dekhein','View')}</span></div>`;
+
+  const m=stepMissing(cur);
+  const done=!!S.comp[cur.id];
+  const chips=cur.docs.map(id=>{const keys=docKeys(id),n=keys.filter(docDone).length,d=DOC_BY[id];return `<span class="doc-chip ${n===keys.length?'ok':'miss'}">${d.icon} ${esc(d.title)}${keys.length>1?' '+n+'/'+keys.length:''}</span>`;}).join('');
+  const bpN=cur.bp?TR().filter((_,i)=>docDone('bp_'+cur.bp+'_'+i)).length:0;
+  h+=`<div class="boarding-pass mb-8">
+    <div class="bp-top">
+      <div class="flex justify-between items-start"><div class="emoji-tile">${cur.emoji}</div>
+        <div class="text-right"><div class="text-2xl font-bold">${fmtT(cur)}</div><div class="text-xs text-muted font-bold">${dayLabel(cur.dt.slice(0,10))} • ${C.zone}</div></div></div>
+      <div><h3 class="text-lg font-bold">${esc(cur.title)}</h3>
+        <div class="flex justify-between items-center"><p class="text-sm text-muted">${esc(cur.place)}</p>
+        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cur.place+', '+C.name)}" target="_blank" rel="noopener" class="btn-icon" style="width:36px;height:36px">🗺️</a></div></div>
+      ${cur.bp?`<div class="text-sm font-bold">🎫 Boarding pass: <span class="${bpN===6?'text-ok':'text-bad'}">${bpN}/6</span></div>`:''}
+      <div class="flex flex-wrap gap-2">${chips}</div>
+    </div>
+    <div class="bp-divider"></div>
+    <div class="bp-bottom">
+      <div class="flex gap-2">
+        ${done?`<button class="btn-primary flex-1" data-act="undo" data-id="${cur.id}" style="background:#64748B">↩ ${t('Wapas','Undo')}</button>`
+              :`<button class="btn-primary flex-1" data-act="done" data-id="${cur.id}">✅ ${t('Haan, ho gaya','Yes, done')}</button>`}
+        <button class="btn-secondary" style="width:auto" data-act="skip" data-id="${cur.id}">Skip</button>
+      </div>
+    </div>
+  </div>`;
+
+  h+=`<h3 class="text-lg font-bold mb-3">${t('Is ke baad','Up next')}</h3><div class="flex-col gap-3 mb-6">`;
+  steps.slice(ci+1,ci+4).forEach(ns=>{
+    h+=`<div class="tl-item"><div class="tl-em" style="background:${CITIES[ns.c].bg}">${ns.emoji}</div><div class="flex-1"><div class="text-xs font-bold text-muted">${dayLabel(ns.dt.slice(0,10))} • ${fmtT(ns)}</div><div class="text-sm font-bold">${esc(ns.title)}</div></div></div>`;
+  });
+  h+=`</div>
+  <div class="flex-col gap-2">
+    <button class="btn-primary" data-act="dayList">📅 ${t('Din band karein','Close a day')}</button>
+    <button class="btn-outline" data-act="actAdd">➕ ${t('Nayi jagah / kaam add karein','Add a place or task')}</button>
+  </div>`;
+  $('ab-area').innerHTML=h;
+}
+function tickCountdowns(){
+  document.querySelectorAll('[data-until]').forEach(el=>{const u=+el.dataset.until;el.textContent=u?dur(u-now()):'—';});
+}
+
+/* ================= STAMPS (steps + nayi jagahen) ================= */
+function cityCode(name){const k=Object.keys(CITIES).find(c=>CITIES[c].name===name);return k||'KHI';}
+function stampList(){
+  const pp=S.photoPlaces||{};
+  const out=allSteps().filter(s=>s.type==='visit').map(s=>{
+    const k=locKey(locOf(s));
+    return {id:s.id,key:k,c:s.c,place:s.place,emoji:s.emoji,dt:s.dt,got:!!S.comp[s.id]||!!pp[k]};
+  });
+  const have=new Set(out.map(x=>x.key));
+  S.extra.forEach(x=>{
+    const k=locKey(x.loc);
+    if(have.has(k))return;
+    have.add(k);
+    out.push({id:'xp_'+k,key:k,c:cityCode(x.loc.city),place:x.loc.place,emoji:'📍',dt:x.date+'T12:00',got:!!pp[k]});
+  });
+  return out;
+}
+function collectedSet(){return new Set(stampList().filter(x=>x.got).map(x=>x.id));}
+function announceNew(before){
+  const fresh=stampList().filter(x=>x.got&&!before.has(x.id));
+  if(fresh.length)celebrate(fresh[0]);
+}
+async function refreshPhotoPlaces(){
+  if(!db)return;
+  const all=await idbAll();
+  const m={};all.forEach(r=>{if(r.kind==='photo'&&r.loc)m[locKey(r.loc)]=1;});
+  S.photoPlaces=m;save();
+}
+
+/* ================= RENDER: SAFAR ================= */
+function stampSVG(s,got){
+  const C=CITIES[s.c],id='sp'+s.id.replace(/[^a-zA-Z0-9]/g,'');
+  return `<div class="stamp-wrapper"><svg class="stamp-svg ${got?'collected':''}" viewBox="0 0 100 100">
+    <defs><path id="a${id}" d="M 15 50 A 35 35 0 0 1 85 50"/><path id="b${id}" d="M 15 50 A 35 35 0 0 0 85 50"/></defs>
+    <circle cx="50" cy="50" r="45" fill="none" stroke="${C.c1}" stroke-width="2" stroke-dasharray="4 2"/>
+    <text font-size="9" font-weight="700" fill="${C.c1}"><textPath href="#a${id}" startOffset="50%" text-anchor="middle">${esc(s.place).slice(0,18)}</textPath></text>
+    <text font-size="7" font-weight="700" fill="${C.c2}"><textPath href="#b${id}" startOffset="50%" text-anchor="middle">${esc(dayLabel(s.dt.slice(0,10)))}</textPath></text>
+  </svg><div class="stamp-emoji" style="opacity:${got?1:.3}">${s.emoji}</div></div>`;
+}
+function renderSafar(){
+  const steps=allSteps();
+  const sts=stampList();
+  $('stamp-count').textContent=sts.filter(x=>x.got).length+' / '+sts.length;
+  $('stamps').innerHTML=sts.map(x=>stampSVG(x,x.got)).join('');
+  let h='',last='';
+  steps.forEach(s=>{
+    const d=s.dt.slice(0,10);
+    if(d!==last){last=d;h+=`<div class="mt-4 mb-2 flex items-center gap-2"><div class="text-sm font-bold" style="background:var(--border-light);padding:4px 12px;border-radius:20px">Day ${dayNumber(d)} · ${dayLabel(d)}</div><div class="flex-1" style="height:1px;background:var(--border-light)"></div></div>`;}
+    const got=!!S.comp[s.id];
+    h+=`<div class="tl-item ${got?'done':''}"><div class="tl-em" style="background:${CITIES[s.c].bg}">${s.emoji}</div>
+      <div class="flex-1"><div class="text-sm font-bold">${esc(s.title)}</div><div class="text-xs text-muted">${fmtT(s)} · ${esc(s.place)}</div></div>
+      <button class="btn-round" data-act="${got?'undo':'done'}" data-id="${s.id}">${got?'✓':(S.skip[s.id]?'–':'○')}</button>
+      ${s.custom?`<button class="btn-round" data-act="delCustom" data-id="${s.id}">✕</button>`:''}</div>`;
+  });
+  $('timeline').innerHTML=h;
+}
+
+/* ================= RENDER: KAGHZAAT ================= */
+function personRow(k,nm,title){
+  const ok=docDone(k),st=S.docs[k]&&S.docs[k].status;
+  return `<div class="ck"><div class="flex-1"><div class="who">${esc(nm)}</div>
+    <div class="text-xs ${ok?'text-ok':'text-bad'}">${st==='not_needed'?t('Zaroorat nahi','Not needed'):ok?t('✓ Mil gaya','✓ Done'):t('Pending','Pending')}</div></div>
+    ${ok&&st!=='not_needed'?`<button class="pill" data-act="docView" data-k="${k}">👁</button><button class="pill" data-act="docUndo" data-k="${k}">↺</button>`
+      :`<button class="pill" data-act="docUp" data-k="${k}" data-title="${esc(title)}">Upload</button><button class="pill" data-act="docNA" data-k="${k}">N/A</button>`}
+  </div>`;
+}
+function singleRow(d){
+  const k=d.id,ok=docDone(k),tel=S.docs[k]&&S.docs[k].tel;
+  if(d.type==='tel'){
+    return `<div class="ck"><div class="flex-1"><b>${d.icon} ${esc(d.title)}</b><div class="text-xs ${tel?'text-ok':'text-bad'}">${tel?esc(tel):t('Number nahi','No number')}</div></div>
+      ${tel?`<a class="pill" href="tel:${esc(tel)}">Call</a><a class="pill" href="https://wa.me/${esc(tel.replace(/\D/g,''))}" target="_blank" rel="noopener">WA</a>`:''}
+      <input class="mini-in" id="tel_${k}" placeholder="Number" inputmode="tel"><button class="pill" data-act="telSave" data-k="${k}">Save</button></div>`;
+  }
+  return `<div class="ck"><div class="flex-1"><b>${d.icon} ${esc(d.title)}</b><div class="text-xs ${ok?'text-ok':'text-bad'}">${ok?t('✓ Mil gaya','✓ Done'):t('Pending','Pending')}</div></div>
+    ${ok?`<button class="pill" data-act="docView" data-k="${k}">👁</button><button class="pill" data-act="docUndo" data-k="${k}">↺</button>`
+        :`<button class="pill" data-act="docUp" data-k="${k}" data-title="${esc(d.title)}">Upload</button><button class="pill" data-act="docNA" data-k="${k}">N/A</button>`}</div>`;
+}
+function renderKaghzaat(){
+  let h='<h3 class="sec-title">🎫 Tickets & Boarding passes</h3>';
+  TICKETS.forEach(tk=>{
+    h+=`<div class="card"><div class="font-bold">${esc(tk.name)}</div><div class="text-xs text-muted mb-2">${esc(tk.sub)}</div>`;
+    tk.legs.forEach(([lid,label])=>{
+      const n=TR().filter((_,i)=>docDone(`bp_${lid}_${i}`)).length;
+      h+=`<details class="det"><summary><span>${esc(label)}</span><span class="pill ${n===6?'ok':'bad'}">${n}/6</span></summary>${TR().map((nm,i)=>personRow(`bp_${lid}_${i}`,nm,'Boarding pass')).join('')}</details>`;
+    });
+    h+='</div>';
+  });
+  h+='<h3 class="sec-title">🛂 Har musafir ke documents</h3>';
+  DOCS.filter(d=>d.multi).forEach(d=>{
+    const keys=docKeys(d.id),n=keys.filter(docDone).length;
+    h+=`<details class="det"><summary><span>${d.icon} ${esc(d.title)}</span><span class="pill ${n===keys.length?'ok':'bad'}">${n}/${keys.length}</span></summary>${TR().map((nm,i)=>personRow(keys[i],nm,d.title)).join('')}</details>`;
+  });
+  h+='<h3 class="sec-title">🏨 Hotels, tours & phones</h3><div class="card">';
+  DOCS.filter(d=>!d.multi).forEach(d=>{h+=singleRow(d);});
+  h+='</div>';
+  $('kaghzaat').innerHTML=h;
+}
+
+/* ================= RENDER: LISTS ================= */
+let listTab='packing';
+function renderLists(){
+  document.querySelectorAll('.seg button').forEach(b=>b.classList.toggle('on',b.dataset.v===listTab));
+  let h='';
+  if(listTab==='packing'){
+    const items=PACK_DEF.concat(S.packX);
+    h=`<div class="card">${items.map(p=>`<div class="check-item ${S.pack[p]?'done':''}" data-act="togPack" data-v="${esc(p)}"><div class="checkbox-round">✓</div><div class="check-text flex-1 text-sm font-bold">${esc(p)}</div></div>`).join('')}
+      <div class="inrow" style="margin-top:10px"><input id="packIn" placeholder="${t('Nayi cheez likhein','Add an item')}"><button class="btn-primary" style="width:auto" data-act="addPack">+</button></div></div>`;
+  }else if(listTab==='shopping'){
+    h=SHOP_DEF.map(c=>`<div class="card"><h3 class="sec-title" style="margin-top:0">${esc(c.cat)}</h3>${c.items.map(i=>shopRow(i)).join('')}</div>`).join('')
+      +`<div class="card">${S.shopX.map(shopRow).join('')}<div class="inrow" style="margin-top:10px"><input id="shopIn" placeholder="${t('Nayi cheez likhein','Add an item')}"><button class="btn-primary" style="width:auto" data-act="addShop">+</button></div></div>`;
+  }else{
+    const items=pendingItems();
+    const grp={};items.forEach(x=>{const k=x.who||t('Dusre','Others');(grp[k]=grp[k]||[]).push(x);});
+    h=`<div class="card"><div class="flex justify-between items-center"><b>${items.length} ${t('pending','pending')}</b>
+      <button class="btn-primary" style="width:auto;padding:8px 14px" data-act="copyPending">📋 Copy text</button></div></div>`;
+    if(!items.length)h+=`<div class="card text-center text-muted">🎉 ${t('Sab mukammal','All done')}</div>`;
+    Object.keys(grp).forEach(g=>{h+=`<div class="card"><div class="who mb-2">${esc(g)}</div>${grp[g].map(x=>`<div class="ck"><span class="text-sm">• ${esc(x.title)}</span></div>`).join('')}</div>`;});
+  }
+  $('lists-area').innerHTML=h;
+}
+function shopRow(i){return `<div class="check-item ${S.shop[i]?'done':''}" data-act="togShop" data-v="${esc(i)}"><div class="checkbox-round">✓</div><div class="check-text flex-1 text-sm font-bold">${esc(i)}</div></div>`;}
+function copyPendingText(){
+  const items=pendingItems();
+  if(!items.length){showToast(t('Kuch pending nahi','Nothing pending'));return;}
+  const grp={};items.forEach(x=>{const k=x.who||'Dusre';(grp[k]=grp[k]||[]).push(x.title);});
+  let txt='*Safar Saathi – Pending*\n';
+  Object.keys(grp).forEach(k=>{txt+='\n*'+k+'*\n'+grp[k].map(l=>'• '+l).join('\n')+'\n';});
+  copyText(txt.trim());
+}
+
+/* ================= RENDER: KHARCHA ================= */
+let catF='';
+function renderKharcha(){
+  const exps=S.expenses;
+  const exp=exps.reduce((a,e)=>a+e.pkr,0),agent=S.agentPKR||0;
+  $('kh-top').innerHTML=`<div class="total-card">
+    <div class="text-sm" style="opacity:.85">${t('Kul kharcha (PKR)','Total spend (PKR)')}</div>
+    <div class="text-2xl font-bold" style="font-size:2rem">PKR ${Math.round(exp).toLocaleString('en-PK')}</div>
+    <div class="text-sm mt-4" style="opacity:.9">Agent booking: PKR ${Math.round(agent).toLocaleString('en-PK')}</div>
+    <div class="text-lg font-bold mt-2">${t('Grand total','Grand total')}: PKR ${Math.round(exp+agent).toLocaleString('en-PK')}</div>
+    <div class="text-xs mt-2" style="opacity:.8">Rates hardcoded: 1 USD=280, 1 THB=8, 1 MYR=60, 1 SGD=205 PKR (code mein update karein)</div></div>`;
+  $('kh-cats').innerHTML=`<button class="${catF===''?'on':''}" data-act="catF" data-v="">${t('Sab','All')}</button>`+CATS.map(c=>`<button class="${catF===c?'on':''}" data-act="catF" data-v="${c}">${c}</button>`).join('');
+  const per={};TR().forEach(n=>per[n]=0);per['Group']=0;
+  exps.forEach(e=>{per[e.who]=(per[e.who]||0)+e.pkr;});
+  $('kh-people').innerHTML=`<h3 class="sec-title" style="margin-top:0">Kis ka kitna</h3>`+Object.keys(per).map(n=>`<div class="check-item"><span class="flex-1 text-sm font-bold">${esc(n==='Group'?'Group / sab ke liye':n)}</span><b>PKR ${Math.round(per[n]).toLocaleString('en-PK')}</b></div>`).join('');
+
+  const list=exps.filter(e=>!catF||e.cat===catF);
+  const dates=[...new Set(list.map(e=>e.date))].sort();
+  if(!dates.length){$('kh-ledger').innerHTML=`<div class="card text-center text-muted">${t('Abhi koi kharcha nahi','No expenses yet')}</div>`;return;}
+  $('kh-ledger').innerHTML=dates.map(d=>{
+    const de=list.filter(e=>e.date===d),tot=de.reduce((a,e)=>a+e.pkr,0);
+    const places={};de.forEach(e=>{const k=locKey(e.loc);(places[k]=places[k]||{label:pathOf(e.loc).join(' › '),items:[]}).items.push(e);});
+    return `<details class="day-card" open><summary style="list-style:none;cursor:pointer;display:flex;justify-content:space-between;font-weight:800;margin-bottom:6px">
+      <span>Day ${dayNumber(d)} · ${dayLabel(d)}</span><span>PKR ${Math.round(tot).toLocaleString('en-PK')}</span></summary>
+      ${Object.keys(places).map(k=>`<div class="led-grp">📍 ${esc(places[k].label)}</div>${places[k].items.sort((a,b)=>a.ts-b.ts).map(e=>
+        `<div class="led-row" data-act="expDetail" data-id="${e.id}"><div class="flex-1"><b>${esc(e.title)}</b><div class="text-xs text-muted">${esc(e.cat)} · ${esc(e.who)} · ${esc(e.method)}</div></div>
+        <div class="text-right"><b>${esc(e.curr)} ${Number(e.amt).toLocaleString('en-US')}</b><div class="text-xs text-muted">PKR ${Math.round(e.pkr).toLocaleString('en-PK')}${e.billId?' · 📎':''}</div></div></div>`).join('')}`).join('')}
+    </details>`;
+  }).join('');
+}
+
+/* ================= RENDER: PHOTOS ================= */
+async function renderPhotos(){
+  freeGrid();
+  if(!db){return;}
+  const recs=(await idbAll()).filter(r=>r.kind==='photo');
+  const dates=[...new Set(TRIP_DAYS.concat(S.extra.map(x=>x.date),recs.map(r=>r.date)))].sort();
+  let h='';
+  dates.forEach(d=>{
+    const list=recs.filter(r=>r.date===d);
+    const groups={};list.forEach(r=>{const k=locKey(r.loc);(groups[k]=groups[k]||{label:pathOf(r.loc).join(' › '),items:[]}).items.push(r);});
+    h+=`<div class="day-card">
+      <div class="flex justify-between items-center mb-2"><h3 class="font-bold">${TRIP_DAYS.includes(d)?'Day '+dayNumber(d)+' · ':''}${dayLabel(d)}</h3><span class="text-xs text-muted">${list.length} 📷</span></div>
+      ${Object.keys(groups).length?Object.keys(groups).map(k=>`<div class="led-grp">📍 ${esc(groups[k].label)}</div><div class="thumb-g">${groups[k].items.map(r=>`<img data-blob="${r.id}" data-act="viewPhoto" data-id="${r.id}" alt="">`).join('')}</div>`).join(''):`<div class="text-sm text-muted mb-2">${t('Abhi koi photo nahi','No photos yet')}</div>`}
+      <button class="btn-outline mt-4" data-act="dayPhoto" data-v="${d}">➕ ${t('Is din ki photo / jagah add karein','Add photo / place for this day')}</button>
+    </div>`;
+  });
+  $('photos-area').innerHTML=h;
+  document.querySelectorAll('#photos-area img[data-blob]').forEach(async el=>{
+    const r=await idbGet(el.dataset.blob).catch(()=>null);
+    if(r&&r.blob)el.src=urlFor(r.blob,gridUrls);
+  });
+}
+
+/* ================= RENDER ALL ================= */
+function renderAll(){
+  renderAb();renderSafar();renderKaghzaat();renderLists();renderKharcha();
+  if(document.getElementById('tab-photos').classList.contains('active'))renderPhotos();
+}
+let lastKey='';
+function tick(){
+  tickCountdowns();
+  const steps=allSteps(),ci=curIndex(steps),nt=steps.find(s=>s.ts>now()&&!S.comp[s.id]);
+  const key=ci+'|'+(nt?nt.id:'');
+  if(key!==lastKey){lastKey=key;renderAb();}
+}
+
+/* ================= ACTIONS: STEPS ================= */
+function completeStep(id){
+  const s=findStep(id);if(!s)return;
+  const m=stepMissing(s);
+  if(m.bp.length||m.docs.length){openGate(id);return;}
+  finishStep(id);
+}
+function finishStep(id,forced){
+  const s=findStep(id);
+  S.comp[id]=Date.now();delete S.skip[id];save();
+  renderAll();
+  if(s.type==='visit'){celebrate(s);return;}
+  openPhotoPrompt(s);
+}
+function undoStep(id){delete S.comp[id];delete S.skip[id];save();renderAll();}
+function skipStep(id){S.skip[id]=true;delete S.comp[id];save();renderAll();}
+
+let gateId=null;
+function openGate(id){
+  gateId=id;
+  const s=findStep(id),m=stepMissing(s);
+  let h=`<div class="text-center mb-4"><div class="text-4xl">⚠️</div><h3>${t('Ruko! Yeh baaki hai','Wait! Missing items')}</h3><p class="text-sm text-muted">${esc(s.title)}</p></div>`;
+  if(m.bp.length)h+=`<div class="sec-title">🎫 Boarding passes (${m.bp.length} baaki)</div>`+m.bp.map(x=>`<div class="ck"><div class="flex-1"><div class="who">${esc(x.who)}</div><div class="text-xs text-muted">${esc(LEG_LABEL[x.leg]||'')}</div></div><button class="pill" data-act="gUp" data-k="${x.k}" data-title="Boarding pass">Upload</button></div>`).join('');
+  if(m.docs.length)h+=`<div class="sec-title">🛂 Documents</div>`+m.docs.map(x=>`<div class="ck"><div class="flex-1"><div class="who">${esc(x.who)}</div><div class="text-sm">${esc(x.title)}</div></div>${x.tel?`<input class="mini-in" id="tel_${x.k}" placeholder="Number"><button class="pill" data-act="telSave" data-k="${x.k}" data-gate="1">Save</button>`:`<button class="pill" data-act="gUp" data-k="${x.k}" data-title="${esc(x.title)}">Upload</button>`}</div>`).join('');
+  if(!m.bp.length&&!m.docs.length)h+=`<button class="btn-primary big mt-4" data-act="gGo" data-id="${id}">🎉 ${t('Shabash! Aage chalein','All good! Proceed')}</button>`;
+  else if(!m.bp.length)h+=`<button class="btn-secondary big mt-4" data-act="gBypass" data-id="${id}">${t('Skip karke aage chalein','Skip and proceed')}</button>`;
+  openSheet(h);
+}
+function openPhotoPrompt(s){
+  openSheet(`<div class="text-center mb-4"><div class="text-4xl">✅</div><h3>${t('Task mukammal!','Task completed!')}</h3><p class="text-sm text-muted">${esc(s.title)}</p></div>
+    <p class="text-center mb-4">${t('Kya is ki koi yaadgaar photo ya bill attach karna hai?','Attach a memorable photo or bill for this?')}</p>
+    <button class="btn-primary big mb-2" data-act="pPhoto" data-id="${s.id}">📸 ${t('Haan, photo daalein','Yes, add photo')}</button>
+    <button class="btn-secondary" data-act="pNo" data-id="${s.id}">${t('Nahi','No')}</button>`);
+}
+function openExpPrompt(s){
+  openSheet(`<h3>💰 ${t('Is task mein kharcha laga?','Any expense in this task?')}</h3><p class="text-sm text-muted mb-4">${esc(s.title)}</p>
+    <button class="btn-primary big mb-2" data-act="expFromStep" data-id="${s.id}">✅ ${t('Haan, entry karein','Yes, add entry')}</button>
+    <button class="btn-secondary" data-act="closeSheet">${t('Nahi','No')}</button>`);
+}
+function celebrate(s){
+  $('celeb-stamp').innerHTML=`<svg viewBox="0 0 100 100"><path id="cc" d="M 15 50 A 35 35 0 0 1 85 50" fill="transparent"/><path id="bb" d="M 15 50 A 35 35 0 0 0 85 50" fill="transparent"/>
+    <text font-size="9" font-weight="700" fill="${CITIES[s.c].c1}"><textPath href="#cc" startOffset="50%" text-anchor="middle">${esc(s.place).slice(0,18)}</textPath></text>
+    <text font-size="7" font-weight="700" fill="${CITIES[s.c].c2}"><textPath href="#bb" startOffset="50%" text-anchor="middle">${esc(dayLabel(s.dt.slice(0,10)))}</textPath></text>
+    <circle cx="50" cy="50" r="45" fill="none" stroke="${CITIES[s.c].c1}" stroke-width="3" stroke-dasharray="6 3"/><text x="50" y="58" font-size="20" text-anchor="middle">${s.emoji}</text></svg>`;
+  $('celeb-name').textContent=s.place;
+  const ov=$('celebration-overlay');ov.classList.add('active');
+  const c=$('confetti-canvas'),cx=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;
+  const cols=['#EC4C42','#12A4AC','#2A5FC4','#F48E32','#8139AF','#10B981'];
+  const p=[];for(let i=0;i<90;i++)p.push({x:c.width/2,y:c.height/2,r:Math.random()*6+2,dx:Math.random()*10-5,dy:Math.random()*-10-5,c:cols[i%cols.length]});
+  let frames=0;
+  (function step(){cx.clearRect(0,0,c.width,c.height);p.forEach(q=>{q.x+=q.dx;q.y+=q.dy;q.dy+=.3;cx.fillStyle=q.c;cx.beginPath();cx.arc(q.x,q.y,q.r,0,Math.PI*2);cx.fill();});if(++frames<150)requestAnimationFrame(step);})();
+  setTimeout(()=>{ov.classList.remove('active');cx.clearRect(0,0,c.width,c.height);},2600);
+  ov.onclick=()=>ov.classList.remove('active');
+}
+
+/* ================= ACTIONS: DOCS ================= */
+function openDocView(k){
+  const d=DOC_BY[k.split('_')[0]]||{};
+  const title=d.title||'Document';
+  openSheet(`<h3>${esc(title)}</h3><p class="text-sm text-muted mb-3">${esc(k)}</p>
+    <div id="docv"></div>
+    <button class="btn-secondary big mt-4" data-act="docUndo" data-k="${esc(k)}">${t('Hatayein (pending karein)','Remove (set pending)')}</button>
+    <button class="btn-secondary big mt-2" data-act="closeSheet">${t('Band karein','Close')}</button>`);
+  idbGet('doc:'+k).then(r=>{
+    if(!r){$('docv').innerHTML='<p class="text-muted">File nahi mili</p>';return;}
+    const u=urlFor(r.blob,sheetUrls);
+    $('docv').innerHTML=(r.mime||'').startsWith('image')?`<img src="${u}" style="width:100%;border-radius:12px">`:`<iframe src="${u}" style="width:100%;height:60vh;border:0;border-radius:12px"></iframe>`;
+  });
+}
+function wizShow(){
+  const it=wiz.items[wiz.i];
+  if(!it){S.wizDone=true;save();closeSheet();renderAll();showToast(t('Sab zaroori documents ka jawab de diya','All required documents answered'));return;}
+  openSheet(`<div class="text-sm text-muted">${wiz.i+1} / ${wiz.items.length}</div>
+    <h3>${esc(it.title)}</h3>
+    ${it.who?`<div class="wwho">${t('Ke liye','For')}: <span class="who">${esc(it.who)}</span></div>`:''}
+    ${it.tel?`<input id="wizTel" placeholder="Number" inputmode="tel"><button class="btn-primary mb-2" data-act="wizTel">Save number</button>`
+            :`<button class="btn-primary big mb-2" data-act="wizUp">📎 Upload</button>`}
+    <div class="flex gap-2"><button class="btn-secondary" data-act="wizSkip">${t('Baad mein','Later')}</button><button class="btn-secondary" data-act="wizNA">${t('Zaroorat nahi','Not needed')}</button></div>`);
+}
+let wiz={items:[],i:0};
+function openWizard(){wiz={items:pendingItems().filter(x=>x.multi),i:0};wizShow();}
+
+/* ================= ACTIONS: EXPENSE ================= */
+let pendingBill=null;
+function openExpense(pre){
+  pre=pre||{};
+  const places=knownPlaces(),d=pre.date||defaultDate();
+  pendingBill=null;
+  openSheet(`<h3>💰 ${t('Naya kharcha','New expense')}</h3>
+    <label class="lbl2">${t('Din','Day')}</label>
+    <select id="exDate">${TRIP_DAYS.map(x=>`<option value="${x}" ${x===d?'selected':''}>Day ${dayNumber(x)} · ${dayLabel(x)}</option>`).join('')}</select>
+    <label class="lbl2">${t('Jagah','Place')}</label>
+    <select id="exPlace" data-chg="exPlace">${places.map(p=>`<option value="${esc(p.key)}" ${p.key===pre.key?'selected':''}>${esc(p.label)}</option>`).join('')}<option value="new">+ ${t('Naya jagah','New place')}</option></select>
+    <div id="exNew" class="hidden">
+      <input id="exNewPlace" placeholder="${t('Jagah ka naam','Place name')}">
+      <select id="exNewCity">${Object.keys(CITIES).map(c=>`<option value="${c}">${CITIES[c].name} (${CITIES[c].country})</option>`).join('')}</select>
+    </div>
+    <label class="lbl2">Category</label>
+    <select id="exCat">${CATS.map(c=>`<option ${c===(pre.cat||'Khana')?'selected':''}>${c}</option>`).join('')}</select>
+    <label class="lbl2">${t('Kis ke liye','For whom')}</label>
+    <select id="exWho"><option value="Group">Group / sab ke liye</option>${TR().map(n=>`<option>${esc(n)}</option>`).join('')}</select>
+    <label class="lbl2">${t('Kya kharcha','What')}</label>
+    <input id="exTitle" placeholder="e.g. Dinner, Shirt" value="${esc(pre.title||'')}">
+    <div class="inrow"><input id="exAmt" type="number" inputmode="decimal" placeholder="Amount"><select id="exCur">${Object.keys(RATES).map(c=>`<option ${c==='THB'?'selected':''}>${c}</option>`).join('')}</select></div>
+    <div class="text-sm font-bold mb-2" id="exPkr">PKR 0</div>
+    <label class="lbl2">Payment</label>
+    <select id="exMethod">${METHODS.map(m=>`<option>${m}</option>`).join('')}</select>
+    <button class="btn-outline mt-2" data-act="exBill">📎 ${t('Bill attach karein (optional)','Attach bill (optional)')} <span id="exBillTxt"></span></button>
+    <button class="btn-primary big mt-4" data-act="exSave">${t('Save karein','Save')}</button>`);
+}
+async function exSave(){
+  const amt=parseFloat($('exAmt').value);
+  if(!(amt>0)){showToast(t('Sahi amount likhein','Enter valid amount'));return;}
+  const title=$('exTitle').value.trim();
+  if(!title){showToast(t('Kya kharcha tha likhein','Enter what it was'));return;}
+  const date=$('exDate').value,pk=$('exPlace').value;
+  let loc;
+  if(pk==='new'){
+    const p=$('exNewPlace').value.trim();
+    if(!p){showToast(t('Jagah ka naam likhein','Enter place name'));return;}
+    const c=CITIES[$('exNewCity').value];
+    loc={country:c.country,city:c.name,place:p};
+    if(!knownPlaces().some(x=>x.key===locKey(loc)))S.extra.push({id:'xp_'+uuid(),date,loc});
+  }else loc=knownPlaces().find(p=>p.key===pk).loc;
+  const cur=$('exCur').value;
+  const e={id:'ex_'+uuid(),date,loc,cat:$('exCat').value,who:$('exWho').value,title,amt,curr:cur,pkr:amt*RATES[cur],method:$('exMethod').value,ts:Date.now(),billId:null};
+  if(pendingBill){
+    const blob=await compImg(pendingBill);
+    e.billId='bl_'+uuid();
+    await idbPut({id:e.billId,kind:'bill',date,loc,ts:e.ts,mime:blob.type||pendingBill.type,blob});
+  }
+  pendingBill=null;
+  S.expenses.push(e);save();closeSheet();renderAll();
+  showToast(t('Kharcha save ho gaya','Expense saved'));
+}
+function updatePkr(){
+  const a=parseFloat($('exAmt')&&$('exAmt').value)||0,c=$('exCur')?$('exCur').value:'PKR';
+  const el=$('exPkr');if(el)el.textContent='PKR '+Math.round(a*RATES[c]).toLocaleString('en-PK');
+}
+function openExpDetail(id){
+  const e=S.expenses.find(x=>x.id===id);if(!e)return;
+  openSheet(`<h3>${esc(e.title)}</h3>
+    <div class="text-sm text-muted mb-2">${dayLabel(e.date)} · ${esc(pathOf(e.loc).join(' › '))}</div>
+    <div class="check-item"><span class="flex-1">Category</span><b>${esc(e.cat)}</b></div>
+    <div class="check-item"><span class="flex-1">Kis ke liye</span><b>${esc(e.who)}</b></div>
+    <div class="check-item"><span class="flex-1">Amount</span><b>${esc(e.curr)} ${Number(e.amt).toLocaleString('en-US')}</b></div>
+    <div class="check-item"><span class="flex-1">PKR</span><b>PKR ${Math.round(e.pkr).toLocaleString('en-PK')}</b></div>
+    <div class="check-item"><span class="flex-1">Payment</span><b>${esc(e.method)}</b></div>
+    <div id="expBill"></div>
+    <button class="btn-secondary big mt-4" data-act="rcptAttach" data-id="${e.id}">📎 ${e.billId?t('Bill badlein','Replace bill'):t('Bill attach karein','Attach bill')}</button>
+    <button class="btn-secondary big mt-2" style="color:#EF4444" data-act="expDel" data-id="${e.id}">🗑️ ${t('Kharcha delete karein','Delete expense')}</button>`);
+  if(e.billId)idbGet(e.billId).then(r=>{if(!r)return;const u=urlFor(r.blob,sheetUrls);$('expBill').innerHTML=(r.mime||'').startsWith('image')?`<img src="${u}" style="width:100%;border-radius:12px;margin-top:10px">`:`<iframe src="${u}" style="width:100%;height:50vh;border:0;margin-top:10px"></iframe>`;});
+}
+
+/* ================= ACTIONS: PLACE PICKER / DAY CLOSE ================= */
+let pp=null;
+function openPlacePicker(d,onDone){
+  pp={date:d,files:[],onDone};
+  const places=knownPlaces();
+  openSheet(`<h3>📍 ${t('Jagah aur photos','Place & photos')}</h3><p class="text-sm text-muted mb-2">${dayLabel(d)}</p>
+    <label class="lbl2">${t('Jagah chunein','Choose place')}</label>
+    <select id="ppPlace" data-chg="ppPlace">${places.map(p=>`<option value="${esc(p.key)}">${esc(p.label)}</option>`).join('')}<option value="new">+ ${t('Naya jagah','New place')}</option></select>
+    <div id="ppNew" class="hidden">
+      <input id="ppNewPlace" placeholder="${t('Jagah ka naam (e.g. Hanuman World)','Place name')}">
+      <select id="ppNewCity">${Object.keys(CITIES).map(c=>`<option value="${c}">${CITIES[c].name} (${CITIES[c].country})</option>`).join('')}</select>
+    </div>
+    <button class="btn-outline mt-2" data-act="ppFiles">📸 ${t('Photos choose karein','Choose photos')}</button>
+    <div class="text-sm text-muted mt-2" id="ppCount">0 ${t('photo chuni','photos selected')}</div>
+    <button class="btn-primary big mt-4" data-act="ppSave">${t('Save karein','Save')}</button>`);
+}
+async function ppSave(){
+  if(!pp)return;
+  const pk=$('ppPlace').value;let loc;
+  if(pk==='new'){
+    const p=$('ppNewPlace').value.trim();
+    if(!p){showToast(t('Jagah ka naam likhein','Enter place name'));return;}
+    const c=CITIES[$('ppNewCity').value];
+    loc={country:c.country,city:c.name,place:p};
+    if(!knownPlaces().some(x=>x.key===locKey(loc)))S.extra.push({id:'xp_'+uuid(),date:pp.date,loc});
+  }else loc=knownPlaces().find(p=>p.key===pk).loc;
+  const bef=collectedSet();
+  for(const f of pp.files)await savePhoto(f,loc,pp.date);
+  announceNew(bef);
+  const done=pp.onDone;pp=null;
+  save();
+  if(done)done();else{closeSheet();renderAll();}
+  showToast(t('Save ho gaya','Saved'));
+}
+function openDayList(){
+  openSheet(`<h3>📅 ${t('Din band karein','Close a day')}</h3>
+    <p class="text-sm text-muted mb-3">${t('Din khatam hone par band karein. Kisi bhi din par ja kar photo ya jagah add kar sakte hain.','Close a day when it ends. You can add photos or places to any day later.')}</p>
+    ${TRIP_DAYS.map(d=>`<div class="check-item"><span class="flex-1"><b>Day ${dayNumber(d)}</b> · ${dayLabel(d)}</span>
+      <span class="pill ${S.closed[d]?'ok':''}">${S.closed[d]?t('Band','Closed'):t('Khula','Open')}</span>
+      <button class="pill" data-act="dayOpen" data-v="${d}">${t('Kholein','Open')}</button></div>`).join('')}`);
+}
+function openDayClose(d){
+  const steps=allSteps().filter(s=>s.dt.slice(0,10)===d);
+  const rows=steps.map(s=>{const st=S.comp[s.id]?'✓':(S.skip[s.id]?'–':'○');return `<div class="check-item"><span class="flex-1 text-sm">${esc(s.title)}</span><b>${st}</b></div>`;}).join('')||`<p class="text-muted text-sm">${t('Is din koi step nahi','No steps this day')}</p>`;
+  const miss=steps.flatMap(s=>stepMissing(s).docs.map(x=>x.title+(x.who?' ('+x.who+')':'')));
+  const bp=steps.reduce((a,s)=>a+stepMissing(s).bp.length,0);
+  openSheet(`<h3>Day ${dayNumber(d)} · ${dayLabel(d)}</h3>
+    <div class="sec-title">${t('Steps','Steps')}</div>${rows}
+    ${(miss.length||bp)?`<div class="sec-title">${t('Pending','Pending')}</div>${miss.map(m=>`<div class="text-sm">• ${esc(m)}</div>`).join('')}${bp?`<div class="text-sm">• ${bp} boarding pass</div>`:''}
+      <p class="text-xs text-muted mt-2">${t('Pending ke saath bhi din band ho sakta hai.','You can close the day with pending items.')}</p>`:''}
+    <div class="sec-title">${t('Aaj kahin aur bhi gaye?','Did you go anywhere else today?')}</div>
+    <button class="btn-outline mb-2" data-act="dayPhoto" data-v="${d}" data-back="1">➕ ${t('Haan, jagah aur photo add karein','Yes, add place and photos')}</button>
+    ${S.closed[d]
+      ?`<button class="btn-secondary big" data-act="dayOpenAgain" data-v="${d}">${t('Din dobara khol dein','Reopen day')}</button>`
+      :`<button class="btn-primary big" data-act="dayClose" data-v="${d}">${t('Nahi, din band karein','No, close the day')}</button>`}`);
+}
+
+/* ================= ACTIONS: ACTIVITY (CUSTOM STEP) ================= */
+function openActivity(){
+  const cities=Object.keys(CITIES).map(c=>`<option value="${c}">${CITIES[c].name} (${CITIES[c].country})</option>`).join('');
+  const types=[['visit','📸 Visit (stamp milega)'],['shop','🛍️ Shopping'],['hotel','🏨 Hotel'],['transfer','🚕 Transfer'],['form','📝 Form'],['task','✅ Aam kaam']];
+  openSheet(`<h3>➕ ${t('Nayi jagah ya kaam','New place or task')}</h3>
+    <input id="acTitle" placeholder="${t('Kaam / activity ka naam','Title')}">
+    <input id="acPlace" placeholder="${t('Jagah ka naam (folder)','Place name')}">
+    <select id="acCity">${cities}</select>
+    <select id="acDay">${TRIP_DAYS.map(d=>`<option value="${d}" ${d===defaultDate()?'selected':''}>Day ${dayNumber(d)} · ${dayLabel(d)}</option>`).join('')}</select>
+    <input id="acTime" type="time" value="10:00">
+    <select id="acType">${types.map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('')}</select>
+    <button class="btn-primary big mt-4" data-act="acSave">${t('Save karein','Save')}</button>`);
+}
+function acSave(){
+  const title=$('acTitle').value.trim(),place=$('acPlace').value.trim()||title;
+  if(!title){showToast(t('Naam likhein','Enter a title'));return;}
+  const type=$('acType').value,c=$('acCity').value;
+  S.custom.push({id:'cu_'+uuid(),custom:true,dt:$('acDay').value+'T'+$('acTime').value,c,type,emoji:TYPE_EMO[type]||'📍',title,place,docs:[]});
+  save();closeSheet();renderAll();showToast(t('Add ho gaya','Added'));
+}
+
+/* ================= ZIP & PDF ================= */
+function openZipScope(){
+  const pl=knownPlaces();
+  const cc={};pl.forEach(p=>{const k=p.loc.country+'|'+p.loc.city;cc[k]=p.loc.country===p.loc.city?p.loc.country:(p.loc.country==='Pakistan'?p.loc.city:p.loc.country+' › '+p.loc.city);});
+  openSheet(`<h3>📦 ${t('ZIP banayein','Make ZIP')}</h3>
+    <p class="text-sm text-muted mb-3">${t('ZIP mein do folders honge: Photos aur Bills. Har folder ke andar Country › City › Jagah.','ZIP has two folders: Photos and Bills, each with Country › City › Place.')}</p>
+    <button class="btn-primary big mb-4" data-act="zipAll">📦 ${t('Pura trip','Whole trip')}</button>
+    <label class="lbl2">${t('Ek din','One day')}</label>
+    <div class="inrow"><select id="zipDay">${TRIP_DAYS.map(d=>`<option value="${d}">Day ${dayNumber(d)} · ${dayLabel(d)}</option>`).join('')}</select>
+      <button class="btn-secondary" style="width:auto" data-act="zipDay">ZIP</button></div>
+    <label class="lbl2">${t('Country / City','Country / City')}</label>
+    <div class="inrow"><select id="zipLoc">${Object.keys(cc).map(k=>`<option value="${esc(k)}">${esc(cc[k])}</option>`).join('')}</select>
+      <button class="btn-secondary" style="width:auto" data-act="zipLoc">ZIP</button></div>`);
+}
+async function buildZip(filter,label){
+  openSheet(`<h3>📦 ${t('ZIP ban rahi hai...','Building ZIP...')}</h3><p class="text-sm text-muted">${esc(label)}</p>`);
+  const recs=(await idbAll()).filter(r=>(r.kind==='photo'||r.kind==='bill')&&filter(r));
+  if(!recs.length){openSheet(`<h3>${t('Kuch nahi mila','Nothing found')}</h3><p class="text-sm text-muted mb-4">${t('Is ke liye koi photo ya bill nahi.','No photo or bill for this.')}</p><button class="btn-secondary" data-act="closeSheet">OK</button>`);return;}
+  const z=new JSZip(),cnt={};
+  recs.sort((a,b)=>a.ts-b.ts).forEach(r=>{
+    const base=r.kind==='bill'?'Bills':'Photos';
+    const dir=[base].concat(pathOf(r.loc)).map(safe).join('/');
+    cnt[dir]=(cnt[dir]||0)+1;
+    const ext=((r.mime||'image/jpeg').split('/')[1]||'jpg').split('+')[0].replace('jpeg','jpg');
+    z.file(`${dir}/${r.date}_${pad(cnt[dir])}.${ext}`,r.blob);
+  });
+  const blob=await z.generateAsync({type:'blob',compression:'STORE'});
+  showResult(new File([blob],'Safar_Saathi_'+safe(label)+'.zip',{type:'application/zip'}),recs.length+' files');
+}
+function ledgerPdf(){
+  if(!window.jspdf||!window.jspdf.jsPDF){showToast(t('PDF library load nahi hui. Internet check karein.','PDF library failed to load. Check internet.'));return;}
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'landscape',unit:'pt',format:'a4'});
+  if(typeof doc.autoTable!=='function'){showToast(t('Table plugin load nahi hua.','Table plugin failed to load.'));return;}
+  doc.setFontSize(14);doc.text('Safar Saathi - Kharcha Ledger (14-29 Nov 2026)',40,40);
+  doc.setFontSize(9);doc.text('Bills is PDF mein shamil nahi. PKR conversion hardcoded rates par.',40,56);
+  const exps=S.expenses.slice().sort((a,b)=>a.date.localeCompare(b.date)||a.ts-b.ts);
+  const rows=[],subs=[];let cur='',dayTot=0;
+  const flush=()=>{if(cur){rows.push(['','','','',"Din ka total",'',Math.round(dayTot).toString(),'']);subs.push(rows.length-1);}};
+  exps.forEach(e=>{
+    if(e.date!==cur){flush();cur=e.date;dayTot=0;}
+    dayTot+=e.pkr;
+    rows.push([e.date,pathOf(e.loc).join(' > '),e.cat,e.who,e.title,e.amt+' '+e.curr,Math.round(e.pkr).toString(),e.method]);
+  });
+  flush();
+  const expTot=exps.reduce((a,e)=>a+e.pkr,0),agent=S.agentPKR||0;
+  rows.push(['','','','','Kharcha total (PKR)','',Math.round(expTot).toString(),'']);subs.push(rows.length-1);
+  rows.push(['','','','','Agent booking (PKR)','',Math.round(agent).toString(),'']);
+  rows.push(['','','','','GRAND TOTAL (PKR)','',Math.round(expTot+agent).toString(),'']);subs.push(rows.length-1);
+  doc.autoTable({
+    startY:70,
+    head:[['Date','Location','Category','Kis ke liye','Kya kharcha','Amount','PKR','Payment']],
+    body:rows,
+    styles:{fontSize:8,cellPadding:4},
+    headStyles:{fillColor:[37,99,235]},
+    didParseCell:d=>{if(d.section==='body'&&subs.includes(d.row.index))d.cell.styles.fontStyle='bold';}
+  });
+  const blob=doc.output('blob');
+  showResult(new File([blob],'Safar_Saathi_Ledger.pdf',{type:'application/pdf'}),'PDF ready');
+}
+
+/* ================= SETTINGS / RESET ================= */
+function openSettings(){
+  let h=`<h3>⚙️ Settings</h3>
+    <label class="lbl2">${t('Photo quality','Photo quality')}</label>
+    <select data-chg="photoQ"><option value="compressed" ${S.settings.photoQ==='compressed'?'selected':''}>${t('Achhi quality, kam jagah','Good quality, less space')}</option><option value="original" ${S.settings.photoQ==='original'?'selected':''}>${t('Original size','Original size')}</option></select>
+    <p class="text-sm text-muted mt-2" id="storageTxt">${t('Storage check ho rahi hai...','Checking storage...')}</p>
+    <div class="sec-title">${t('Travelers','Travelers')}</div>
+    <div id="travList">${TR().map((n,i)=>`<input class="tv" value="${esc(n)}" placeholder="Naam">`).join('')}</div>
+    <button class="btn-outline mb-2" data-act="travAdd">➕ ${t('Ek aur naam','Add a name')}</button>
+    <button class="btn-primary mb-4" data-act="travSave">${t('Travelers save karein','Save travelers')}</button>
+    <div class="sec-title">${t('Simulation (testing)','Preview date (testing)')}</div>
+    <input type="datetime-local" data-chg="sim" value="${esc(S.settings.simNow)}">
+    <button class="btn-outline mb-4" data-act="clearSim">${t('Asli date use karein','Use real date')}</button>
+    <button class="btn-outline mb-2" data-act="installGuide">📲 ${t('Home Screen par add karne ka tareeqa','How to add to Home Screen')}</button>
+    <button class="btn-secondary mb-2" data-act="resetAsk">🔄 ${t('Sirf kaghzaat reset karein (sab pending)','Reset only documents (all pending)')}</button>
+    <button class="btn-outline" style="color:#EF4444;border-color:#FCA5A5" data-act="hardAsk">🗑️ ${t('Sab kuch mita dein (Hard reset)','Hard reset everything')}</button>`;
+  openSheet(h);
+  if(navigator.storage&&navigator.storage.estimate)navigator.storage.estimate().then(e=>{const el=$('storageTxt');if(el)el.textContent=(e.usage/1048576).toFixed(1)+' MB '+t('istemal hui','used');});
+}
+function saveTravelers(){
+  const names=[...document.querySelectorAll('.tv')].map(i=>i.value.trim()).filter(Boolean);
+  if(!names.length){showToast(t('Kam az kam ek naam','At least one name'));return;}
+  S.travelers=names;save();
+}
+function resetDocs(){
+  Object.keys(S.docs).forEach(k=>{S.docs[k]=Object.assign({},S.docs[k],{status:'pending'});});
+  save();closeSheet();renderAll();showToast(t('Sab kaghzaat pending ho gaye (files safe hain)','All documents pending (files kept)'));
+}
+async function hardReset(){
+  closeSheet();
+  openSheet(`<div class="text-center"><div class="text-4xl">🧹</div><p class="text-muted">${t('Mita raha hai...','Erasing...')}</p></div>`);
+  freeGrid();freeSheet();
+  try{if(db){db.close();db=null;}}catch(e){}
+  await Promise.race([
+    new Promise(res=>{try{const r=indexedDB.deleteDatabase('SafarSaathiDB');r.onsuccess=r.onerror=r.onblocked=()=>res();}catch(e){res();}}),
+    new Promise(res=>setTimeout(res,3000))
+  ]);
+  try{localStorage.clear();}catch(e){}
+  location.reload();
+}
+function installGuide(){
+  openSheet(`<div class="text-center mb-4"><div class="text-4xl">📲</div><h3>Home Screen par add karein</h3><p class="text-sm text-muted">${t('Ek dafa kar lein, phir app ki tarah khulegi.','Do this once, then it opens like an app.')}</p></div>
+    ${[['Ye page <b>Safari</b> mein kholein (Chrome mein nahi).'],['Neeche wale <b>Share</b> button ⬆️ dabayein.'],['Menu mein neeche scroll karke <b>Add to Home Screen</b> dabayein.'],['Upar <b>Add</b> dabayein. Home Screen par icon aa jayega.']].map((x,i)=>`<div class="ck"><div style="width:28px;height:28px;border-radius:50%;background:var(--c-current-1);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0">${i+1}</div><div class="text-sm">${x[0]}</div></div>`).join('')}
+    <button class="btn-primary big mt-4" data-act="installDone">${t('Samajh gaya','Got it')}</button>`);
+}
+function maybeInstall(){
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!/crios|fxios|edgios/i.test(navigator.userAgent);
+  const standalone=window.navigator.standalone===true||window.matchMedia('(display-mode: standalone)').matches;
+  if(!ios||standalone||S.installDismissed)return;
+  if(document.getElementById('sheet').classList.contains('active'))return;
+  installGuide();
+}
+
+/* ================= WEATHER ================= */
+const WX={};
+async function updateWeather(){
+  const steps=allSteps(),cur=steps[curIndex(steps)];
+  const C=CITIES[cur.c];
+  const cached=WX[cur.c];
+  if(!cached||Date.now()-cached.ts>9e5){
+    try{
+      const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${C.lat}&longitude=${C.lng}&hourly=temperature_2m,weathercode&timezone=auto&forecast_days=2`);
+      const j=await r.json();
+      WX[cur.c]={ts:Date.now(),hours:j.hourly.time.map((x,i)=>({t:x,temp:Math.round(j.hourly.temperature_2m[i]),code:j.hourly.weathercode[i]}))};
+    }catch(e){WX[cur.c]={ts:Date.now(),hours:null};}
+  }
+  const w=WX[cur.c];
+  let temp='--';
+  if(w&&w.hours){
+    const nowKey=new Intl.DateTimeFormat('en-CA',{timeZone:C.zone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',hourCycle:'h23'}).format(new Date(now())).replace(', ','T')+':00';
+    const hit=w.hours.find(h=>h.t.slice(0,13)===nowKey.slice(0,13));
+    if(hit)temp=hit.temp;
+  }
+  $('wbtn').textContent=temp+'°';
+  return w;
+}
+function wIcon(c){if(c<=1)return '☀️';if(c<=3)return '⛅';if(c<=49)return '☁️';if(c<=69)return '🌧️';if(c<=79)return '❄️';return '⛈️';}
+async function openWeather(){
+  const steps=allSteps(),cur=steps[curIndex(steps)];
+  openSheet(`<h3>${CITIES[cur.c].name} · ${t('Mausam','Weather')}</h3><div id="wlist" class="text-muted text-sm">Loading...</div>`);
+  const w=await updateWeather();
+  if(!w||!w.hours){$('wlist').textContent=t('Mausam nahi mil saka (internet?)','Weather unavailable (internet?)');return;}
+  const list=w.hours.filter(h=>Date.parse(h.t+':00')>Date.now()-3600000).slice(0,24);
+  $('wlist').innerHTML=`<div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:8px">${list.map(h=>`<div class="card" style="min-width:70px;text-align:center;margin:0"><div class="text-xs text-muted font-bold">${h.t.slice(11,16)}</div><div style="font-size:1.3rem">${wIcon(h.code)}</div><div class="font-bold">${h.temp}°</div></div>`).join('')}</div>`;
+}
+
+/* ================= EVENTS ================= */
+const ACT={
+  tab:el=>switchTab(el.dataset.v),
+  lang:()=>{S.lang=S.lang==='ur'?'en':'ur';save();document.documentElement.lang=S.lang;$('langBtn').textContent=S.lang==='ur'?'EN':'UR';renderAll();},
+  weather:()=>openWeather(),
+  settings:()=>openSettings(),
+  closeSheet:()=>closeSheet(),
+  listTab:el=>{listTab=el.dataset.v;renderLists();},
+  togPack:el=>{const v=el.dataset.v;S.pack[v]=!S.pack[v];save();renderLists();},
+  addPack:()=>{const v=$('packIn').value.trim();if(!v)return;S.packX.push(v);save();renderLists();},
+  togShop:el=>{const v=el.dataset.v;S.shop[v]=!S.shop[v];save();renderLists();},
+  addShop:()=>{const v=$('shopIn').value.trim();if(!v)return;S.shopX.push(v);save();renderLists();},
+  copyPending:()=>copyPendingText(),
+  done:el=>completeStep(el.dataset.id),
+  undo:el=>undoStep(el.dataset.id),
+  skip:el=>skipStep(el.dataset.id),
+  delCustom:el=>{const id=el.dataset.id;S.custom=S.custom.filter(c=>c.id!==id);delete S.comp[id];delete S.skip[id];save();renderAll();},
+  gUp:el=>{const k=el.dataset.k,title=el.dataset.title;pickFiles(async files=>{await setDocFile(k,files,title);if(gateId&&$('sheet').classList.contains('active'))openGate(gateId);renderAll();},false);},
+  telSave:el=>{const k=el.dataset.k,v=$('tel_'+k).value.trim();if(!v){showToast(t('Number likhein','Enter number'));return;}S.docs[k]={status:'done',tel:v};save();if(el.dataset.gate&&gateId)openGate(gateId);renderAll();},
+  gGo:el=>{closeSheet();finishStep(el.dataset.id);},
+  gBypass:el=>{closeSheet();finishStep(el.dataset.id,true);},
+  pPhoto:el=>{const s=findStep(el.dataset.id);closeSheet();pickFiles(async files=>{const bef=collectedSet();for(const f of files)await savePhoto(f,locOf(s),s.dt.slice(0,10));announceNew(bef);save();showToast(t('Photo save ho gayi','Photo saved'));openExpPrompt(s);},true);},
+  pNo:el=>{const s=findStep(el.dataset.id);openExpPrompt(s);},
+  expFromStep:el=>{const s=findStep(el.dataset.id);openExpense({date:s.dt.slice(0,10),key:locKey(locOf(s)),cat:CAT_BY_TYPE[s.type]||'Others',title:s.title});},
+  docUp:el=>{const k=el.dataset.k,title=el.dataset.title;pickFiles(async files=>{await setDocFile(k,files,title);renderAll();},false);},
+  docView:el=>openDocView(el.dataset.k),
+  docUndo:el=>{const k=el.dataset.k;delete S.docs[k];save();idbDel('doc:'+k).catch(()=>{});closeSheet();renderAll();},
+  docNA:el=>{S.docs[el.dataset.k]={status:'not_needed'};save();renderAll();},
+  wizUp:()=>{const it=wiz.items[wiz.i];pickFiles(async files=>{await setDocFile(it.k,files,it.title);wiz.i++;wizShow();},false);},
+  wizSkip:()=>{const it=wiz.items[wiz.i];S.docs[it.k]=Object.assign({},S.docs[it.k]||{},{status:'pending'});save();wiz.i++;wizShow();},
+  wizNA:()=>{const it=wiz.items[wiz.i];S.docs[it.k]={status:'not_needed'};save();wiz.i++;wizShow();},
+  wizTel:()=>{const it=wiz.items[wiz.i],v=$('wizTel').value.trim();if(!v){showToast(t('Number likhein','Enter number'));return;}S.docs[it.k]={status:'done',tel:v};save();wiz.i++;wizShow();},
+  wizOpen:()=>openWizard(),
+  expNew:()=>openExpense({}),
+  exBill:()=>pickFiles(files=>{pendingBill=files[0];const el=$('exBillTxt');if(el)el.textContent='✓';showToast(t('Bill select ho gaya','Bill selected'));},false),
+  exSave:()=>exSave(),
+  expDetail:el=>openExpDetail(el.dataset.id),
+  rcptAttach:el=>{const id=el.dataset.id;pickFiles(async files=>{const e=S.expenses.find(x=>x.id===id);const blob=await compImg(files[0]);if(e.billId)await idbDel(e.billId).catch(()=>{});const bid='bl_'+uuid();await idbPut({id:bid,kind:'bill',date:e.date,loc:e.loc,ts:e.ts,mime:blob.type||files[0].type,blob});e.billId=bid;save();openExpDetail(id);renderKharcha();},false);},
+  expDel:el=>askConfirm(t('Kharcha delete karein?','Delete expense?'),t('Ye wapas nahi aayega.','This cannot be undone.'),'expDelDo',el.dataset.id),
+  expDelDo:el=>{const id=el.dataset.id;const e=S.expenses.find(x=>x.id===id);if(e&&e.billId)idbDel(e.billId).catch(()=>{});S.expenses=S.expenses.filter(x=>x.id!==id);save();closeSheet();renderAll();},
+  catF:el=>{catF=el.dataset.v;renderKharcha();},
+  agentEdit:()=>openSheet(`<h3>🧾 ${t('Agent booking (PKR)','Agent booking (PKR)')}</h3><p class="text-sm text-muted">${t('Agent ko di gayi total rakam','Total amount paid to the agent')}</p><input id="agentIn" type="number" inputmode="decimal" value="${S.agentPKR||''}" placeholder="PKR"><button class="btn-primary big" data-act="agentSave">Save</button>`),
+  agentSave:()=>{S.agentPKR=parseFloat($('agentIn').value)||0;save();closeSheet();renderKharcha();},
+  ledgerPdf:()=>ledgerPdf(),
+  actAdd:()=>openActivity(),
+  acSave:()=>acSave(),
+  dayList:()=>openDayList(),
+  dayOpen:el=>openDayClose(el.dataset.v),
+  dayOpenAgain:el=>{delete S.closed[el.dataset.v];save();openDayClose(el.dataset.v);renderAll();},
+  dayClose:el=>{S.closed[el.dataset.v]=Date.now();save();closeSheet();renderAll();showToast(t('Din band ho gaya','Day closed'));},
+  dayPhoto:el=>{const d=el.dataset.v;const back=el.dataset.back;openPlacePicker(d,()=>{if(back){openDayClose(d);}else{closeSheet();renderPhotos();}});},
+  ppFiles:()=>pickFiles(files=>{pp.files=pp.files.concat(files);const el=$('ppCount');if(el)el.textContent=pp.files.length+' '+t('photo chuni','photos selected');},true),
+  ppSave:()=>ppSave(),
+  viewPhoto:el=>viewPhoto(el.dataset.id),
+  delPhoto:el=>askConfirm(t('Photo delete karein?','Delete photo?'),'','photoDelDo',el.dataset.id),
+  photoDelDo:el=>{idbDel(el.dataset.id).then(()=>refreshPhotoPlaces()).then(()=>{closeSheet();renderAll();renderPhotos();});},
+  zipOpen:()=>openZipScope(),
+  zipAll:()=>buildZip(()=>true,'Pura trip'),
+  zipDay:()=>{const d=$('zipDay').value;buildZip(r=>r.date===d,'Day '+d);},
+  zipLoc:()=>{const k=$('zipLoc').value;const [c,ci]=k.split('|');buildZip(r=>r.loc.country===c&&r.loc.city===ci,ci);},
+  shareRes:()=>{if(resFile)shareOrDownload(resFile);},
+  resetAsk:()=>askConfirm(t('Kaghzaat reset karein?','Reset documents?'),t('Sab documents pending ho jayenge. Files delete nahi hongi.','All documents go back to pending. Files are kept.'),'resetDo',''),
+  resetDo:()=>resetDocs(),
+  hardAsk:()=>askConfirm(t('Sab kuch mita dein?','Erase everything?'),t('Photos, documents, kharche aur settings sab delete ho jayenge.','All photos, documents, expenses and settings will be deleted.'),'hardDo',''),
+  hardDo:()=>hardReset(),
+  travAdd:()=>{const d=document.createElement('input');d.className='tv';d.placeholder='Naam';$('travList').appendChild(d);d.focus();},
+  travSave:()=>{saveTravelers();closeSheet();renderAll();showToast(t('Save ho gaya','Saved'));},
+  clearSim:()=>{S.settings.simNow='';save();closeSheet();renderAll();},
+  installGuide:()=>installGuide(),
+  installDone:()=>{S.installDismissed=true;save();closeSheet();}
+};
+function switchTab(n){
+  document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(e=>e.classList.remove('active'));
+  $('tab-'+n).classList.add('active');
+  const b=document.querySelector(`.tab-btn[data-tab="${n}"]`);if(b)b.classList.add('active');
+  window.scrollTo(0,0);
+  if(n==='photos')renderPhotos();
+}
+function viewPhoto(id){
+  openSheet(`<div id="pv"></div><button class="btn-secondary big mt-4" data-act="photoDelAsk" data-id="${id}">🗑️ ${t('Delete','Delete')}</button><button class="btn-secondary big mt-2" data-act="closeSheet">${t('Band karein','Close')}</button>`);
+  idbGet(id).then(r=>{if(!r)return;const u=urlFor(r.blob,sheetUrls);$('pv').innerHTML=(r.mime||'').startsWith('video')?`<video src="${u}" controls style="width:100%;border-radius:12px"></video>`:`<img src="${u}" style="width:100%;border-radius:12px">`;});
+}
+ACT.photoDelAsk=el=>askConfirm(t('Photo delete karein?','Delete photo?'),'','photoDelDo',el.dataset.id);
+
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act]');
+  if(!el)return;
+  const fn=ACT[el.dataset.act];
+  if(fn){e.preventDefault();fn(el);}
+});
+document.addEventListener('change',e=>{
+  const el=e.target.closest('[data-chg]');if(!el)return;
+  if(el.dataset.chg==='photoQ'){S.settings.photoQ=el.value;save();}
+  if(el.dataset.chg==='sim'){S.settings.simNow=el.value||'';save();renderAll();}
+  if(el.dataset.chg==='exPlace'){$('exNew').classList.toggle('hidden',el.value!=='new');}
+  if(el.dataset.chg==='ppPlace'){$('ppNew').classList.toggle('hidden',el.value!=='new');}
+});
+document.addEventListener('input',e=>{if(e.target.id==='exAmt')updatePkr();});
+document.addEventListener('change',e=>{if(e.target.id==='exCur')updatePkr();});
+document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
+
+/* ================= BOOT ================= */
+function openTravelerSetup(first){
+  openSheet(`<h3>👥 ${t('Safar ke musafir','Travelers')}</h3>
+    <p class="text-sm text-muted mb-3">${t('Ye 6 naam sahi hain? Zaroorat ho to edit karein.','Are these 6 names correct? Edit if needed.')}</p>
+    <div id="travList">${TRAV_DEFAULT.map(n=>`<input class="tv" value="${esc(n)}">`).join('')}</div>
+    <button class="btn-outline mb-2" data-act="travAdd">➕ ${t('Ek aur naam','Add a name')}</button>
+    <button class="btn-primary big" data-act="travFirst">${t('Tasdeeq karein aur agay barhein','Confirm and continue')}</button>`);
+}
+ACT.travFirst=()=>{saveTravelers();if(!S.travelers){return;}closeSheet();openWizard();renderAll();};
+
+(async function boot(){
+  try{await openDB();}catch(e){showToast(t('Storage error. Normal Safari mein kholein.','Storage error. Open in normal Safari.'));}
+  await refreshPhotoPlaces().catch(()=>{});
+  document.getElementById('langBtn').textContent=S.lang==='ur'?'EN':'UR';
+  if(!S.travelers){
+    openTravelerSetup(true);
+    renderAll();
+  }else{
+    renderAll();
+    if(!S.wizDone)openWizard();
+    else setTimeout(maybeInstall,3000);
+  }
+  updateWeather();
+  setInterval(tick,30000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick();});
+})();
+</script>
+</body>
+</html>
